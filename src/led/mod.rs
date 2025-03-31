@@ -1,4 +1,4 @@
-use palette::IntoColor;
+use palette::{FromColor, LinSrgb, Srgb};
 
 mod chipsets;
 mod clocked;
@@ -7,7 +7,7 @@ mod clockless;
 mod esp;
 
 pub use chipsets::*;
-pub use clocked::ClockedWriterBitBang;
+pub use clocked::ClockedDelayWriter;
 use smart_leds_trait::SmartLedsWrite;
 
 pub trait LedDriver {
@@ -16,7 +16,7 @@ pub trait LedDriver {
 
     fn write<C, const N: usize>(&mut self, pixels: [C; N]) -> Result<(), Self::Error>
     where
-        C: IntoColor<Self::Color>;
+        Self::Color: FromColor<C>;
 }
 
 impl<Driver, DriverColor> LedDriver for Driver
@@ -29,12 +29,11 @@ where
 
     fn write<C, const N: usize>(&mut self, pixels: [C; N]) -> Result<(), Self::Error>
     where
-        C: IntoColor<Self::Color>,
+        Self::Color: FromColor<C>,
     {
-        let iterator = pixels.into_iter().map(|item| {
-            let item: palette::Srgb = item.into_color();
-            let item: palette::LinSrgb = item.into_color();
-            smart_leds_trait::RGB::<f32>::new(item.red, item.green, item.blue)
+        let iterator = pixels.into_iter().map(|color| {
+            let color: LinSrgb<f32> = Srgb::from_color(color).into_linear();
+            smart_leds_trait::RGB::<f32>::new(color.red, color.green, color.blue)
         });
         SmartLedsWrite::write(self, iterator)
     }
@@ -48,4 +47,17 @@ pub enum RgbOrder {
     GBR,
     BRG,
     BGR,
+}
+
+impl RgbOrder {
+    pub fn reorder<Word>(&self, red: Word, green: Word, blue: Word) -> [Word; 3] {
+        match self {
+            RgbOrder::RGB => [red, green, blue],
+            RgbOrder::RBG => [red, blue, green],
+            RgbOrder::GRB => [green, red, blue],
+            RgbOrder::GBR => [green, blue, red],
+            RgbOrder::BRG => [blue, red, green],
+            RgbOrder::BGR => [blue, green, red],
+        }
+    }
 }
