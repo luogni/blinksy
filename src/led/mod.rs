@@ -14,8 +14,9 @@ pub trait LedDriver {
     type Error;
     type Color;
 
-    fn write<C, const N: usize>(&mut self, pixels: [C; N]) -> Result<(), Self::Error>
+    fn write<I, C>(&mut self, pixels: I) -> Result<(), Self::Error>
     where
+        I: IntoIterator<Item = C>,
         Self::Color: FromColor<C>;
 }
 
@@ -27,8 +28,9 @@ where
     type Color = palette::Srgb;
     type Error = Driver::Error;
 
-    fn write<C, const N: usize>(&mut self, pixels: [C; N]) -> Result<(), Self::Error>
+    fn write<I, C>(&mut self, pixels: I) -> Result<(), Self::Error>
     where
+        I: IntoIterator<Item = C>,
         Self::Color: FromColor<C>,
     {
         let iterator = pixels.into_iter().map(|color| {
