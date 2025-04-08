@@ -1,7 +1,11 @@
 use noise::NoiseFn;
 use palette::Hsv;
 
-use crate::{Layout1d, Layout2d, Pattern1d, Pattern2d};
+use crate::{
+    dimension::{Dim1d, Dim2d},
+    layout::{Layout1d, Layout2d},
+    pattern::Pattern,
+};
 
 pub mod noise_fns {
     pub use noise::{OpenSimplex, Perlin, Simplex};
@@ -34,7 +38,7 @@ where
     params: NoiseParams,
 }
 
-impl<Layout, Noise> Pattern1d<Layout> for Noise1d<Noise>
+impl<Layout, Noise> Pattern<Dim1d, Layout> for Noise1d<Noise>
 where
     Layout: Layout1d,
     Noise: NoiseFn<f64, 2> + Default,
@@ -79,7 +83,7 @@ where
     params: NoiseParams,
 }
 
-impl<Layout, Noise> Pattern2d<Layout> for Noise2d<Noise>
+impl<Layout, Noise> Pattern<Dim2d, Layout> for Noise2d<Noise>
 where
     Layout: Layout2d,
     Noise: NoiseFn<f64, 3> + Default,

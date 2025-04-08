@@ -1,85 +1,53 @@
 use crate::time::{Megahertz, Nanoseconds};
-use embedded_hal::{delay::DelayNs, digital::OutputPin, spi::SpiBus};
+use core::marker::PhantomData;
+use embedded_hal::{delay::DelayNs, digital::OutputPin};
 use palette::FromColor;
 
-use super::LedDriver;
-
-pub trait ClockedWriter {
-    type Word: Copy + 'static;
-    type Error;
-
-    fn write(&mut self, words: &[Self::Word]) -> Result<(), Self::Error>;
-}
-
-pub trait ClockedLed {
-    type Word: Copy + 'static;
-    type Color;
-    fn start<Writer: ClockedWriter<Word = Self::Word>>(
-        &self,
-        writer: &mut Writer,
-    ) -> Result<(), Writer::Error>;
-    fn color<Writer: ClockedWriter<Word = Self::Word>>(
-        &self,
-        writer: &mut Writer,
-        color: Self::Color,
-    ) -> Result<(), Writer::Error>;
-    fn reset<Writer: ClockedWriter<Word = Self::Word>>(
-        &self,
-        writer: &mut Writer,
-    ) -> Result<(), Writer::Error>;
-    fn end<Writer: ClockedWriter<Word = Self::Word>>(
-        &self,
-        writer: &mut Writer,
-        pixel_count: usize,
-    ) -> Result<(), Writer::Error>;
-}
+use super::{ClockedLed, ClockedWriter, LedDriver};
 
 #[derive(Debug)]
-pub struct ClockedDriver<Led, Writer>
+pub struct ClockedDelayDriver<Led, Data, Clock, Delay>
 where
     Led: ClockedLed,
-    Writer: ClockedWriter,
+    Data: OutputPin,
+    Clock: OutputPin,
+    Delay: DelayNs,
 {
-    led: Led,
-    writer: Writer,
+    led: PhantomData<Led>,
+    writer: ClockedDelayWriter<Data, Clock, Delay>,
 }
 
-impl<Led, Writer> ClockedDriver<Led, Writer>
+impl<Led, Data, Clock, Delay> ClockedDelayDriver<Led, Data, Clock, Delay>
 where
     Led: ClockedLed,
-    Writer: ClockedWriter,
+    Data: OutputPin,
+    Clock: OutputPin,
+    Delay: DelayNs,
 {
-    pub fn new(led: Led, writer: Writer) -> Self {
-        Self { led, writer }
+    pub fn new(data: Data, clock: Clock, delay: Delay, data_rate: Megahertz) -> Self {
+        Self {
+            led: PhantomData,
+            writer: ClockedDelayWriter::new(data, clock, delay, data_rate),
+        }
     }
 }
 
-impl<Led, Writer> LedDriver for ClockedDriver<Led, Writer>
+impl<Led, Data, Clock, Delay> LedDriver for ClockedDelayDriver<Led, Data, Clock, Delay>
 where
-    Led: ClockedLed,
-    Writer: ClockedWriter<Word = Led::Word>,
+    Led: ClockedLed<Word = u8>,
+    Data: OutputPin,
+    Clock: OutputPin,
+    Delay: DelayNs,
 {
-    type Error = Writer::Error;
+    type Error = <ClockedDelayWriter<Data, Clock, Delay> as ClockedWriter>::Error;
     type Color = Led::Color;
 
-    fn write<I, C>(&mut self, pixels: I) -> Result<(), Self::Error>
+    fn write<I, C>(&mut self, pixels: I, brightness: f32) -> Result<(), Self::Error>
     where
         I: IntoIterator<Item = C>,
         Self::Color: FromColor<C>,
     {
-        self.led.start(&mut self.writer)?;
-
-        let mut pixel_count = 0;
-        for color in pixels.into_iter() {
-            let color = Self::Color::from_color(color);
-            self.led.color(&mut self.writer, color)?;
-            pixel_count += 1;
-        }
-
-        self.led.reset(&mut self.writer)?;
-        self.led.end(&mut self.writer, pixel_count)?;
-
-        Ok(())
+        Led::clocked_write(&mut self.writer, pixels, brightness)
     }
 }
 
@@ -154,17 +122,5 @@ where
             }
         }
         Ok(())
-    }
-}
-
-impl<Spi> ClockedWriter for Spi
-where
-    Spi: SpiBus<u8>,
-{
-    type Error = Spi::Error;
-    type Word = u8;
-
-    fn write(&mut self, words: &[Self::Word]) -> Result<(), Self::Error> {
-        self.write(words)
     }
 }

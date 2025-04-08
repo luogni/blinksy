@@ -1,44 +1,29 @@
 use core::marker::PhantomData;
-
 use embedded_hal::{delay::DelayNs, digital::OutputPin};
-use fugit::NanosDurationU32 as Nanoseconds;
-use palette::{FromColor, LinSrgb, Srgb};
+use palette::{FromColor, Srgb};
 
-use super::{LedDriver, RgbOrder};
+use super::ClocklessLed;
+use crate::driver::LedDriver;
 
-pub trait LedClockless {
-    const T_0H: Nanoseconds;
-    const T_0L: Nanoseconds;
-    const T_1H: Nanoseconds;
-    const T_1L: Nanoseconds;
-    const T_RESET: Nanoseconds;
-
-    fn t_cycle() -> Nanoseconds {
-        (Self::T_0H + Self::T_0L).max(Self::T_1H + Self::T_1L)
-    }
-}
-
-pub struct ClocklessDelayDriver<Led: LedClockless, Pin: OutputPin, Delay: DelayNs> {
+pub struct ClocklessDelayDriver<Led: ClocklessLed, Pin: OutputPin, Delay: DelayNs> {
     led: PhantomData<Led>,
     pin: Pin,
     delay: Delay,
-    rgb_order: RgbOrder,
 }
 
 impl<Led, Pin, Delay> ClocklessDelayDriver<Led, Pin, Delay>
 where
-    Led: LedClockless,
+    Led: ClocklessLed,
     Pin: OutputPin,
     Delay: DelayNs,
 {
-    pub fn new(mut pin: Pin, delay: Delay, rgb_order: RgbOrder) -> Result<Self, Pin::Error> {
+    pub fn new(mut pin: Pin, delay: Delay) -> Result<Self, Pin::Error> {
         pin.set_low()?;
 
         Ok(Self {
             led: PhantomData,
             delay,
             pin,
-            rgb_order,
         })
     }
 
@@ -81,22 +66,22 @@ where
 
 impl<Led, Pin, Delay> LedDriver for ClocklessDelayDriver<Led, Pin, Delay>
 where
-    Led: LedClockless,
+    Led: ClocklessLed,
     Pin: OutputPin,
     Delay: DelayNs,
 {
     type Error = Pin::Error;
     type Color = Srgb;
 
-    fn write<I, C>(&mut self, pixels: I) -> Result<(), Self::Error>
+    fn write<I, C>(&mut self, pixels: I, brightness: f32) -> Result<(), Self::Error>
     where
         I: IntoIterator<Item = C>,
         Self::Color: FromColor<C>,
     {
         for color in pixels {
-            let color: LinSrgb<u8> = Srgb::from_color(color).into_linear().into_format();
-            let buffer = self.rgb_order.reorder(color.red, color.green, color.blue);
-            self.write_buffer(&buffer)?;
+            let color = Srgb::from_color(color) * brightness;
+            let array = Led::COLOR_CHANNELS.to_array(color);
+            self.write_buffer(array.as_ref())?;
         }
         self.delay_for_reset();
         Ok(())

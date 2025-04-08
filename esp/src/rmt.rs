@@ -1,6 +1,9 @@
 // Credit: https://github.com/DaveRichmond/esp-hal-smartled
 
-use super::{clockless::LedClockless, LedDriver, RgbOrder};
+use blinksy::{
+    color::{FromColor, Srgb},
+    driver::{clockless::ClocklessLed, ColorArray, LedDriver},
+};
 use core::{fmt::Debug, marker::PhantomData, slice::IterMut};
 use esp_hal::{
     clock::Clocks,
@@ -8,7 +11,6 @@ use esp_hal::{
     peripheral::Peripheral,
     rmt::{Error as RmtError, PulseCode, TxChannel, TxChannelConfig, TxChannelCreator},
 };
-use palette::{FromColor, IntoColor, LinSrgb, Srgb};
 
 /// All types of errors that can happen during the conversion and transmission
 /// of LED commands
@@ -27,32 +29,31 @@ pub enum ClocklessRmtDriverError {
 /// an `LedAdapterError:BufferSizeExceeded` error.
 #[macro_export]
 macro_rules! create_rmt_buffer {
-    ($led_count:expr) => {
+    ($led_count:expr, $channel_count:expr) => {
         // The size we're assigning here is calculated as following
         //  (
         //   Nr. of LEDs
         //   * channels (r,g,b -> 3)
-        //   * pulses per channel 8)
+        //   * pulses per channel (8)
         //  ) + 1 additional pulse for the end delimiter
-        [0u32; $led_count * 24 + 1]
+        [0u32; $led_count * $channel_count * 8 + 1]
     };
 }
 
 pub struct ClocklessRmtDriver<Led, Tx, const BUFFER_SIZE: usize>
 where
-    Led: LedClockless,
+    Led: ClocklessLed,
     Tx: TxChannel,
 {
     led: PhantomData<Led>,
     channel: Option<Tx>,
-    rgb_order: RgbOrder,
     rmt_buffer: [u32; BUFFER_SIZE],
     pulses: (u32, u32, u32),
 }
 
 impl<'d, Led, Tx, const BUFFER_SIZE: usize> ClocklessRmtDriver<Led, Tx, BUFFER_SIZE>
 where
-    Led: LedClockless,
+    Led: ClocklessLed,
     Tx: TxChannel,
 {
     /// Create a new adapter object that drives the pin using the RMT channel.
@@ -60,7 +61,6 @@ where
         channel: C,
         pin: impl Peripheral<P = P> + 'd,
         rmt_buffer: [u32; BUFFER_SIZE],
-        rgb_order: RgbOrder,
     ) -> Self
     where
         C: TxChannelCreator<'d, Tx, P>,
@@ -88,7 +88,6 @@ where
 
         Self {
             led: PhantomData,
-            rgb_order,
             channel: Some(channel),
             rmt_buffer,
             pulses: (
@@ -116,36 +115,39 @@ where
         Ok(())
     }
 
-    fn write_color_to_rmt<C: IntoColor<Srgb>>(
-        color: C,
+    fn write_color_to_rmt(
+        color: Srgb,
         rmt_iter: &mut IterMut<u32>,
-        rgb_order: &RgbOrder,
         pulses: &(u32, u32, u32),
     ) -> Result<(), ClocklessRmtDriverError> {
-        let color: Srgb = color.into_color();
-        let color: LinSrgb = color.into_color();
-        let color: LinSrgb<u8> = color.into_format();
-        let (a, b, c) = match rgb_order {
-            RgbOrder::RGB => (color.red, color.green, color.blue),
-            RgbOrder::RBG => (color.red, color.blue, color.green),
-            RgbOrder::GRB => (color.green, color.red, color.blue),
-            RgbOrder::GBR => (color.green, color.blue, color.red),
-            RgbOrder::BRG => (color.blue, color.red, color.green),
-            RgbOrder::BGR => (color.blue, color.green, color.red),
-        };
-        Self::write_color_byte_to_rmt(&a, rmt_iter, pulses)?;
-        Self::write_color_byte_to_rmt(&b, rmt_iter, pulses)?;
-        Self::write_color_byte_to_rmt(&c, rmt_iter, pulses)?;
+        let array = Led::COLOR_CHANNELS.to_array(color);
+        match array {
+            ColorArray::Rgb(rgb) => {
+                Self::write_color_byte_to_rmt(&rgb[0], rmt_iter, pulses)?;
+                Self::write_color_byte_to_rmt(&rgb[1], rmt_iter, pulses)?;
+                Self::write_color_byte_to_rmt(&rgb[2], rmt_iter, pulses)?;
+            }
+            ColorArray::Rgbw(rgbw) => {
+                Self::write_color_byte_to_rmt(&rgbw[0], rmt_iter, pulses)?;
+                Self::write_color_byte_to_rmt(&rgbw[1], rmt_iter, pulses)?;
+                Self::write_color_byte_to_rmt(&rgbw[2], rmt_iter, pulses)?;
+                Self::write_color_byte_to_rmt(&rgbw[3], rmt_iter, pulses)?;
+            }
+        }
         Ok(())
     }
 
     /// Convert all pixels to the RMT format and
     /// add them to internal buffer, then start a singular RMT operation
     /// based on that buffer.
-    pub fn write_pixels<I, C>(&mut self, pixels: I) -> Result<(), ClocklessRmtDriverError>
+    pub fn write_pixels<I, C>(
+        &mut self,
+        pixels: I,
+        brightness: f32,
+    ) -> Result<(), ClocklessRmtDriverError>
     where
         I: IntoIterator<Item = C>,
-        C: IntoColor<Srgb>,
+        Srgb: FromColor<C>,
     {
         // We always start from the beginning of the buffer
         let mut rmt_iter = self.rmt_buffer.iter_mut();
@@ -154,7 +156,8 @@ where
         // This will result in an `BufferSizeExceeded` error in case
         // the iterator provides more elements than the buffer can take.
         for color in pixels {
-            Self::write_color_to_rmt(color, &mut rmt_iter, &self.rgb_order, &self.pulses)?;
+            let color = Srgb::from_color(color) * brightness;
+            Self::write_color_to_rmt(color, &mut rmt_iter, &self.pulses)?;
         }
 
         // Finally, add the end element.
@@ -179,17 +182,17 @@ where
 
 impl<Led, Tx, const BUFFER_SIZE: usize> LedDriver for ClocklessRmtDriver<Led, Tx, BUFFER_SIZE>
 where
-    Led: LedClockless,
+    Led: ClocklessLed,
     Tx: TxChannel,
 {
     type Error = ClocklessRmtDriverError;
     type Color = Srgb;
 
-    fn write<I, C>(&mut self, pixels: I) -> Result<(), Self::Error>
+    fn write<I, C>(&mut self, pixels: I, brightness: f32) -> Result<(), Self::Error>
     where
         I: IntoIterator<Item = C>,
         Self::Color: FromColor<C>,
     {
-        self.write_pixels(pixels)
+        self.write_pixels(pixels, brightness)
     }
 }

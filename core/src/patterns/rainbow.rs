@@ -1,6 +1,10 @@
 use palette::Hsv;
 
-use crate::{Layout1d, Layout2d, Pattern1d, Pattern2d};
+use crate::{
+    dimension::{Dim1d, Dim2d},
+    layout::{Layout1d, Layout2d},
+    pattern::Pattern,
+};
 
 #[derive(Debug)]
 pub struct RainbowParams {
@@ -24,7 +28,7 @@ pub struct Rainbow {
     params: RainbowParams,
 }
 
-impl<Layout> Pattern1d<Layout> for Rainbow
+impl<Layout> Pattern<Dim1d, Layout> for Rainbow
 where
     Layout: Layout1d,
 {
@@ -55,7 +59,7 @@ where
     }
 }
 
-impl<Layout> Pattern2d<Layout> for Rainbow
+impl<Layout> Pattern<Dim2d, Layout> for Rainbow
 where
     Layout: Layout2d,
 {

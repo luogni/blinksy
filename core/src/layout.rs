@@ -11,6 +11,16 @@ pub trait Layout1d {
     const PIXEL_COUNT: usize;
 }
 
+#[macro_export]
+macro_rules! layout1d {
+    ( $name:ident, $pixel_count:expr ) => {
+        struct $name;
+        impl $crate::layout::Layout1d for $name {
+            const PIXEL_COUNT: usize = $pixel_count;
+        }
+    };
+}
+
 #[derive(Debug, Clone)]
 pub enum Shape2d {
     Point(Vec2),
@@ -250,10 +260,10 @@ pub trait Layout2d {
 macro_rules! layout2d {
     ( $name:ident, [ $( $shape:expr ),* $(,)? ] ) => {
         struct $name;
-        impl $crate::Layout2d for $name {
+        impl $crate::layout::Layout2d for $name {
             const PIXEL_COUNT: usize = 0 $(+ $shape.pixel_count())*;
 
-            fn shapes() -> impl Iterator<Item = $crate::Shape2d> {
+            fn shapes() -> impl Iterator<Item = $crate::layout::Shape2d> {
                 [$($shape),*].into_iter()
             }
         }
