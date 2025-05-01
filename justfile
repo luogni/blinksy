@@ -34,7 +34,12 @@ bump-version crate bump:
     #!/usr/bin/env bash
     set -euo pipefail
 
-    CRATE_TOML=$(find . -name "Cargo.toml" -path "*{{crate}}*" | grep -v "./Cargo.toml" | grep -v "./esp/Cargo.toml" | head -n 1)
+    CRATE_TOML=$(find . \
+        -name Cargo.toml \
+        -path "*{{crate}}*" \
+        ! -path "./Cargo.toml" \
+        ! -path "./esp/Cargo.toml" \
+        | head -n1)
     if [ -z "$CRATE_TOML" ]; then
         echo "Crate {{crate}} not found!"
         exit 1
@@ -74,7 +79,12 @@ tag-release crate:
     #!/usr/bin/env bash
     set -euo pipefail
 
-    CRATE_TOML=$(find . -name "Cargo.toml" -path "*{{crate}}*" | grep -v "./Cargo.toml" | grep -v "./esp/Cargo.toml" | head -n 1)
+    CRATE_TOML=$(find . \
+        -name Cargo.toml \
+        -path "*{{crate}}*" \
+        ! -path "./Cargo.toml" \
+        ! -path "./esp/Cargo.toml" \
+        | head -n1)
     if [ -z "$CRATE_TOML" ]; then
         echo "Crate {{crate}} not found!"
         exit 1
@@ -94,6 +104,7 @@ tag-release crate:
 release crate bump:
     #!/usr/bin/env bash
     set -euo pipefail
+
     NEW_VERSION=$(just bump-version {{crate}} {{bump}})
     git add .
     git commit -m "Bump {{crate}} to version $NEW_VERSION"
