@@ -2,8 +2,9 @@
 name = "blinksy"
 version = "0.1.0"
 edition = "2021"
-description = "no-std, no-alloc LED control library designed for 1D, 2D, and 3D layouts"
 rust-version.workspace = true
+description.workspace = true
+readme.workspace = true
 homepage.workspace = true
 repository.workspace = true
 license.workspace = true

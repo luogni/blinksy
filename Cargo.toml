@@ -7,6 +7,8 @@ members = [
 
 [workspace.package]
 rust-version = "1.85.0"
+description = "no-std, no-alloc LED control library designed for 1D, 2D, and 3D layouts"
+readme = "README.md"
 homepage = "https://github.com/ahdinosaur/blinksy"
 repository = "https://github.com/ahdinosaur/blinksy"
 license = "EUPL-1.2"

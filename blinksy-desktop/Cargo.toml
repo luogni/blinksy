@@ -3,6 +3,15 @@ name = "blinksy-desktop"
 version = "0.1.0"
 edition = "2021"
 
+rust-version.workspace = true
+description.workspace = true
+readme.workspace = true
+homepage.workspace = true
+repository.workspace = true
+license.workspace = true
+keywords = ["blinksy"]
+categories = ["multimedia", "rendering"]
+
 [dependencies]
 blinksy = { path = "../blinksy", version = "0.1" }
 glam = { version = "0.30.1" }
