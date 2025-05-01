@@ -58,9 +58,16 @@ jobs:
         run: |
           CRATE=${{ steps.tag-info.outputs.crate }}
           WORKSPACE=${{ steps.tag-info.outputs.workspace }}
+
+          CARGO_ARGS=""
+
           if [[ "$WORKSPACE" == "esp" ]]; then
             cd esp
-            cargo publish --manifest-path $CRATE/Cargo.toml
-          else
-            cargo publish --manifest-path $CRATE/Cargo.toml
           fi
+
+          # Must use a chip feature to build esp-hal
+          if [[ "$CRATE" == "blinksy-esp" ]]; then
+            CARGO_ARGS="-F esp32"
+          fi
+
+          cargo publish -p $CRATE $CARGO_ARGS
