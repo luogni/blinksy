@@ -44,10 +44,8 @@ version crate bump:
     set -euo pipefail
 
     CRATE_TOML=$(find . \
-        -name Cargo.toml \
-        -path "*{{crate}}*" \
-        ! -path "./Cargo.toml" \
-        ! -path "./esp/Cargo.toml" \
+        -path "./{{crate}}/Cargo.toml" \
+        -o -path "./esp/{{crate}}/Cargo.toml" \
         | head -n1)
     if [ -z "$CRATE_TOML" ]; then
         echo "Crate {{crate}} not found!"
@@ -89,10 +87,8 @@ tag crate:
     set -euo pipefail
 
     CRATE_TOML=$(find . \
-        -name Cargo.toml \
-        -path "*{{crate}}*" \
-        ! -path "./Cargo.toml" \
-        ! -path "./esp/Cargo.toml" \
+        -path "./{{crate}}/Cargo.toml" \
+        -o -path "./esp/{{crate}}/Cargo.toml" \
         | head -n1)
     if [ -z "$CRATE_TOML" ]; then
         echo "Crate {{crate}} not found!"
