@@ -1,5 +1,14 @@
 [workspace]
 resolver = "3"
 members = [
-  "blinksy"
-, "blinksy-desktop"]
+  "blinksy",
+  "blinksy-desktop"
+]
+
+[workspace.package]
+rust-version = "1.85.0"
+homepage = "https://github.com/ahdinosaur/blinksy"
+repository = "https://github.com/ahdinosaur/blinksy"
+license = "EUPL-1.2"
+keywords = ["blinksy", "embedded", "no-std", "ws2812", "apa102"]
+categories = ["embedded", "hardware-support", "multimedia", "no-std", "rendering"]

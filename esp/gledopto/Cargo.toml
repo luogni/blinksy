@@ -5,8 +5,8 @@ version = "0.1.0"
 
 [dependencies]
 critical-section = "1.2.0"
-blinksy = { path = "../../blinksy" }
-blinksy-esp = { path = "../blinksy-esp", features = ["esp32"] }
+blinksy = { path = "../../blinksy", version = "0.1" }
+blinksy-esp = { path = "../blinksy-esp", version = "0.1", features = ["esp32"] }
 button-driver = { version = "0.2.2", features = ["embedded_hal"] }
 defmt = "0.3.10"
 esp-hal = { version = "1.0.0-beta.0", features = ["defmt", "esp32", "unstable"] }

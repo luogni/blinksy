@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-blinksy = { path = "../../blinksy" }
+blinksy = { path = "../../blinksy", version = "0.1" }
 esp-hal = { version = "1.0.0-beta.0", default-features = false, features = ["defmt", "unstable"] }
 defmt = "0.3.10"
 
