@@ -110,7 +110,7 @@ release crate bump:
     #!/usr/bin/env bash
     set -euo pipefail
 
-    NEW_VERSION=$(just bump-version {{crate}} {{bump}})
+    NEW_VERSION=$(just version {{crate}} {{bump}})
     git add .
     git commit -m "Bump {{crate}} to version $NEW_VERSION"
     just tag-release {{crate}}
