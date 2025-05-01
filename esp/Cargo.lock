@@ -64,7 +64,7 @@ dependencies = [
  "fugit",
  "glam",
  "heapless",
- "noise",
+ "noise-fork-nostd",
  "num-traits",
  "palette",
  "smart-leds-trait",
@@ -868,9 +868,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8d5439c4ad607c3c23abf66de8c8bf57ba8adcd1f129e699851a6e43935d339d"
 
 [[package]]
-name = "noise"
+name = "noise-fork-nostd"
 version = "0.9.0"
-source = "git+https://github.com/ahdinosaur/noise-rs?branch=no-std#c825bac5be17d16545008cbd6c3c853cbf83bee8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e0eb27381fa459e4ea14a5d69240e32b48732de5aaeaf0e4a6f6c95199a8d5a3"
 dependencies = [
  "num-traits",
  "rand",

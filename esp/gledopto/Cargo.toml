@@ -3,6 +3,15 @@ edition = "2021"
 name    = "gledopto"
 version = "0.1.0"
 
+rust-version.workspace = true
+description.workspace = true
+readme = "README.md"
+homepage.workspace = true
+repository.workspace = true
+license.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
 [dependencies]
 critical-section = "1.2.0"
 blinksy = { path = "../../blinksy", version = "0.1" }

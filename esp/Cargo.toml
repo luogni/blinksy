@@ -5,6 +5,16 @@ members = [
   "gledopto"
 ]
 
+[workspace.package]
+rust-version = "1.85.0"
+description = "no-std, no-alloc LED control library designed for 1D, 2D, and 3D layouts"
+readme = "../README.md"
+homepage = "https://github.com/ahdinosaur/blinksy"
+repository = "https://github.com/ahdinosaur/blinksy"
+license = "EUPL-1.2"
+keywords = ["blinksy", "embedded", "no-std", "ws2812", "apa102"]
+categories = ["embedded", "hardware-support", "multimedia", "no-std", "rendering"]
+
 [profile.dev]
 # Rust debug is too slow.
 # For debug builds always builds with some optimization

@@ -12,8 +12,7 @@ Select the board by using its respective feature.
 
 ## Features
 
-- [ ] 1D, 2D, or 3D LED control using [`blinksy`](https://github.com/ahdinosaur/blinksy)
-  - Supported LED chips [here](https://github.ahdinosaur/blinksy#supported-led-chips)
+- [x] 1D, 2D, or 3D LED control using [`blinksy`](https://github.com/ahdinosaur/blinksy)
 - [x] Built-in "Function" button
 - [ ] Alternative "IO33" button
 - [ ] Built-in microphone
@@ -63,14 +62,3 @@ cargo run --example dev
 - ESP no-std examples: https://github.com/esp-rs/no_std-training
 - Gledopto GL-C-016WL-D page: https://www.gledopto.eu/gledopto-esp32-wled-uart_1
 - Gledopto GL-C-016WL-D user instructions: https://www.gledopto.eu/mediafiles/anleitungen/7002-gl-c-016wl-d-eng.pdf
-- smart-leds: https://github.com/smart-leds-rs/smart-leds
-- esp-hal-smartled: https://github.com/DaveRichmond/esp-hal-smartled
-- FastLED: https://github.com/FastLED/FastLED
-
-## TODO
-
-- Add support for built-in i2s microphone
-  - https://docs.espressif.com/projects/rust/esp-hal/1.0.0-beta.0/esp32/esp_hal/i2s/master/index.html
-  - https://github.com/decaday/embedded-audio/blob/master/embedded-audio/src/stream/cpal_stream.rs
-- Add support for beat detection
-  - https://github.com/phip1611/beat-detector

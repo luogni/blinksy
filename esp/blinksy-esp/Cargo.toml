@@ -3,6 +3,15 @@ name = "blinksy-esp"
 version = "0.1.0"
 edition = "2021"
 
+rust-version.workspace = true
+description.workspace = true
+readme.workspace = true
+homepage.workspace = true
+repository.workspace = true
+license.workspace = true
+keywords = ["blinksy", "embedded", "no-std", "esp32"]
+categories.workspace = true
+
 [dependencies]
 blinksy = { path = "../../blinksy", version = "0.1" }
 esp-hal = { version = "1.0.0-beta.0", default-features = false, features = ["defmt", "unstable"] }
