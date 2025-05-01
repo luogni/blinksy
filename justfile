@@ -2,11 +2,20 @@
 # Examples
 ##
 
-gledopto-apa102-grid:
-  cd esp && cargo run -p gledopto --example apa102-grid
+desktop-1d-rainbow:
+  cargo run --release --example 1d-rainbow
+
+desktop-2d-rainbow:
+  cargo run --release --example 2d-rainbow
+
+desktop-2d-noise:
+  cargo run --release --example 2d-noise
 
 gledopto-ws2812-strip:
-  cd esp && cargo run -p gledopto --example ws2812-strip
+  cd esp && cargo run --release -p gledopto --example ws2812-strip
+
+gledopto-apa102-grid:
+  cd esp && cargo run --release -p gledopto --example apa102-grid
 
 ##
 # Testing
@@ -23,14 +32,14 @@ check-esp:
 ##
 
 # List all crates in the project
-list-crates:
+crates:
     @echo "Root workspace crates:"
     @find . -name "Cargo.toml" -not -path "./Cargo.toml" -not -path "./esp/*" -not -path "./target/*" | sort
     @echo "\nESP workspace crates:"
     @find ./esp -name "Cargo.toml" -not -path "./esp/Cargo.toml" -not -path "*/target/*" | sort
 
 # Bump version for a specific crate (supports semver keywords or explicit version)
-bump-version crate bump:
+version crate bump:
     #!/usr/bin/env bash
     set -euo pipefail
 
@@ -75,7 +84,7 @@ bump-version crate bump:
     echo $NEW_VERSION
 
 # Create a tag for a crate release
-tag-release crate:
+tag crate:
     #!/usr/bin/env bash
     set -euo pipefail
 
