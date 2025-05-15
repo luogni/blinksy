@@ -16,7 +16,7 @@
 //! Patterns are generic over both the dimension they operate in and the specific layout
 //! type, allowing compile-time enforcement of dimensional compatibility.
 
-use crate::{color::OutputColor, dimension::LayoutForDim};
+use crate::dimension::LayoutForDim;
 
 /// Trait for creating visual patterns on LED layouts.
 ///
@@ -36,7 +36,7 @@ use crate::{color::OutputColor, dimension::LayoutForDim};
 /// # Example
 ///
 /// ```rust
-/// use blinksy::{color::Hsi, dimension::Dim1d, layout::Layout1d, pattern::Pattern};
+/// use blinksy::{color::Okhsv, dimension::Dim1d, layout::Layout1d, pattern::Pattern};
 ///
 /// struct RainbowParams {
 ///     speed: f32,
@@ -52,7 +52,7 @@ use crate::{color::OutputColor, dimension::LayoutForDim};
 ///     Layout: Layout1d,
 /// {
 ///     type Params = RainbowParams;
-///     type Color = Hsi;
+///     type Color = Okhsv;
 ///
 ///     fn new(params: Self::Params) -> Self {
 ///         Self { params }
@@ -64,7 +64,7 @@ use crate::{color::OutputColor, dimension::LayoutForDim};
 ///
 ///         Layout::points().map(move |x| {
 ///             let hue = x * step + offset;
-///             Hsi::new(hue, 1.0, 1.0)
+///             Okhsv::new(hue, 1.0, 1.0)
 ///         })
 ///     }
 /// }
@@ -77,7 +77,7 @@ where
     type Params;
 
     /// The color type produced by this pattern.
-    type Color: OutputColor;
+    type Color;
 
     /// Creates a new pattern instance with the specified parameters.
     fn new(params: Self::Params) -> Self;
