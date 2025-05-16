@@ -171,4 +171,4 @@ jobs:
       - name: Clippy
         shell: bash
         working-directory: ./esp
-        run: cargo clippy -F gl_c_016wl_d -- -D warnings
+        run: cargo clippy -- -F gl_c_016wl_d  -D warnings
