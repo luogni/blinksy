@@ -1,7 +1,7 @@
 [package]
 edition = "2021"
 name    = "gledopto"
-version = "0.2.0"
+version = "0.2.1"
 
 rust-version.workspace = true
 description.workspace = true
@@ -32,12 +32,12 @@ fugit = "0.3.7"
 
 # Gledopto GL-C-016WL-D
 gl_c_016wl_d = [
-  "esp-hal/esp32",
+  "blinksy-esp/esp32",
 ]
 
 # Mock for tests, builds, and docs
 mock = [
-  "esp-hal/esp32c6"
+  "blinksy-esp/esp32c6"
 ]
 
 [package.metadata.docs.rs]
