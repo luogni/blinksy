@@ -67,8 +67,9 @@ jobs:
       fail-fast: false
       matrix:
         device: [
-            { soc: "esp32", toolchain: "esp" },
-          ]
+          { soc: "esp32", toolchain: "esp" },
+        ]
+
     steps:
       - uses: actions/checkout@v4
 
@@ -92,6 +93,13 @@ jobs:
     env:
       CARGO_TARGET_DIR: ${{ github.workspace }}/target
 
+    strategy:
+      fail-fast: false
+      matrix:
+        device: [
+          { board: "gl_c_016wl_d", toolchain: "esp" },
+        ]
+
     steps:
       - uses: actions/checkout@v4
 
@@ -102,13 +110,13 @@ jobs:
 
       - uses: Swatinem/rust-cache@v2
         with:
-          prefix-key: "ci-${{ matrix.device.soc }}"
+          prefix-key: "ci-${{ matrix.device.board }}"
           cache-all-crates: true
 
       - name: Check gledopto
         shell: bash
         working-directory: ./esp
-        run: cargo check -p gledopto
+        run: cargo +${{ matrix.device.toolchain }} check -p gledopto -F ${{ matrix.device.board }}
 
   lint:
     runs-on: ubuntu-latest
@@ -158,9 +166,9 @@ jobs:
       - name: Fmt
         shell: bash
         working-directory: ./esp
-        run: cargo fmt --all -- --check
+        run: cargo fmt -F gl_c_016wl_d --all -- --check
 
       - name: Clippy
         shell: bash
         working-directory: ./esp
-        run: cargo clippy -- -D warnings
+        run: cargo clippy -F gl_c_016wl_d -- -D warnings

@@ -65,9 +65,14 @@ jobs:
             cd esp
           fi
 
-          # Must use a chip feature to build esp-hal
+          # Must use a chip feature to build blinksy-esp
           if [[ "$CRATE" == "blinksy-esp" ]]; then
             CARGO_ARGS="-F esp32"
+          fi
+
+          # Must use a board feature to build gledopto
+          if [[ "$CRATE" == "gledopto" ]]; then
+            CARGO_ARGS="-F gl_c_016wl_d"
           fi
 
           cargo publish -p $CRATE $CARGO_ARGS
