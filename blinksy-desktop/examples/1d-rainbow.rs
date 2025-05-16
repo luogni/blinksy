@@ -1,10 +1,10 @@
 use blinksy::{
     layout1d,
-    patterns::{Rainbow, RainbowParams},
+    patterns::rainbow::{Rainbow, RainbowParams},
     ControlBuilder,
 };
 use blinksy_desktop::{
-    drivers::{Desktop, DesktopError},
+    driver::{Desktop, DesktopError},
     time::elapsed_in_ms,
 };
 use std::{thread::sleep, time::Duration};

@@ -2,7 +2,7 @@
 
 //! # Blinksy
 //!
-//! Blinksy is a no-std, no-alloc LED control library designed for 1D, 2D, and 3D (audio-reactive)
+//! Blinksy is a no-std, no-alloc LED control library designed for 1D, 2D, and 3D
 //! LED setups, inspired by [FastLED](https://fastled.io/) and [WLED](https://kno.wled.ge/).
 //!
 //! ## How Blinksy works
@@ -30,26 +30,14 @@
 //! - **Desktop Simulation:** Run a simulation of a layout and pattern on your computer to experiment with ideas.
 //! - (TODO) **Audio-Reactive**: Easily integrate audio reactivity into visual patterns.
 //!
-//! ## Architecture
-//!
-//! The library is organized into several modules:
-//!
-//! - [`color`]: Color types and utilities
-//! - [`control`]: Control system
-//! - [`dimension`]: Dimension type-level markers
-//! - [`driver`]: LED driver interface
-//! - [`drivers`]: LED driver implementations
-//! - [`layout`]: LED layout abstractions
-//! - [`pattern`]: Pattern abstraction
-//! - [`patterns`]: Pattern implementations
-//! - [`time`]: Timing utilities
-//!
 //! ## Quick Start
+//!
+//! To get started, see [control].
 //!
 //! ### 1D Strip with Rainbow Pattern
 //!
 //! ```rust,ignore
-//! use blinksy::{ControlBuilder, layout1d, patterns::{Rainbow, RainbowParams}};
+//! use blinksy::{ControlBuilder, layout1d, patterns::rainbow::{Rainbow, RainbowParams}};
 //!
 //! // Define a 1D layout with 60 LEDs
 //! layout1d!(Layout, 60);
@@ -74,7 +62,7 @@
 //!     ControlBuilder,
 //!     layout::{Shape2d, Vec2},
 //!     layout2d,
-//!     patterns::{noise_fns, Noise2d, NoiseParams},
+//!     patterns::noise::{noise_fns, Noise2d, NoiseParams},
 //! };
 //!
 //! layout2d!(
@@ -110,7 +98,6 @@ pub mod layout;
 pub mod pattern;
 pub mod patterns;
 pub mod time;
-
 mod util;
 
 pub use self::control::*;

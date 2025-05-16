@@ -1,15 +1,23 @@
 //! # Noise Patterns
 //!
-//! This module provides noise-based visual effects that use noise functions to create
-//! organic, flowing patterns. Noise patterns are useful for creating fire, clouds, water,
-//! and other natural-looking animations.
+//! The noise pattern creates flowing animations based on a noise function.
 //!
-//! ## Features
+//! # What is a noise function?
 //!
-//! - Multiple noise function options (Perlin, Simplex, OpenSimplex)
-//! - Configurable animation speed and scale
-//! - 1D and 2D variants for different layout types
-//! - Creates flowing, organic patterns
+//! A noise function is given a position in 1d, 2d, 3d, or 4d space and returns
+//! a random value between -1.0 and 1.0, where values between nearbly positions are
+//! smoothly interpolated.
+//!
+//! For example, a common use of noise functions is to procedurally generate terrain.
+//! You could give a 2d noise function an (x, y) position and use the resulting value
+//! as an elevation.
+//!
+//! In our case, we will use noise functions to generate `hue` and `value` for [Okhsv]
+//! colors. To animate through time, rather than adding time to our position, we will
+//! input the time to the noise function as an additonal dimension. So a 1d layout will
+//! use a 2d noise function, a 2d layout a 3d noise function, and so on.
+//!
+//! This pattern is the same concept as what you see on [mikey.nz](https://mikey.nz/).
 //!
 //! ## Example
 //!
@@ -18,7 +26,7 @@
 //!     ControlBuilder,
 //!     layout2d,
 //!     layout::{Shape2d, Vec2},
-//!     patterns::{Noise2d, noise_fns, NoiseParams}
+//!     patterns::noise::{Noise2d, noise_fns, NoiseParams}
 //! };
 //!
 //! // Define a 2D layout
@@ -44,6 +52,9 @@
 //!     .with_driver(/* your driver */)
 //!     .build();
 //! ```
+//!
+//! [`Okhsv`]: crate::color::Okhsv
+//! [mikey.nz]: https://mikey.nz
 
 use noise::{NoiseFn, Seedable};
 
@@ -64,7 +75,6 @@ pub mod noise_fns {
 pub struct NoiseParams {
     /// Controls the speed of animation (higher = faster)
     pub time_scalar: f64,
-
     /// Controls the spatial scale of the noise (higher = more compressed)
     pub position_scalar: f64,
 }
@@ -81,7 +91,7 @@ impl Default for NoiseParams {
 
 /// One-dimensional noise pattern implementation.
 ///
-/// Creates flowing patterns based on a 2D noise function, using
+/// Creates flowing animations based on a 2D noise function, using
 /// time and the 1D position for the input coordinates.
 #[derive(Debug)]
 pub struct Noise1d<Noise>
@@ -90,10 +100,8 @@ where
 {
     /// The noise function used to get hue
     hue_noise: Noise,
-
     /// The noise function used to get value
     value_noise: Noise,
-
     /// Configuration parameters
     params: NoiseParams,
 }
@@ -125,6 +133,7 @@ where
             value_noise,
             params,
         } = self;
+
         let NoiseParams {
             time_scalar,
             position_scalar,
@@ -144,7 +153,7 @@ where
 
 /// Two-dimensional noise pattern implementation.
 ///
-/// Creates flowing patterns based on a 3D noise function, using
+/// Creates flowing animations based on a 3D noise function, using
 /// time and the 2D position for the input coordinates.
 #[derive(Debug)]
 pub struct Noise2d<Noise>
@@ -153,10 +162,8 @@ where
 {
     /// The noise function used to get hue
     hue_noise: Noise,
-
     /// The noise function used to get value
     value_noise: Noise,
-
     /// Configuration parameters
     params: NoiseParams,
 }
@@ -188,6 +195,7 @@ where
             value_noise,
             params,
         } = self;
+
         let NoiseParams {
             time_scalar,
             position_scalar,

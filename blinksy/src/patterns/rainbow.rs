@@ -1,15 +1,8 @@
 //! # Rainbow Pattern
 //!
-//! This module provides a rainbow effect pattern that creates smooth color transitions
-//! across the LED layout. The colors flow through the full HSV spectrum, creating a
-//! classic rainbow visual.
-//!
-//! ## Features
-//!
-//! - Smooth transitions through the full color spectrum
-//! - Configurable animation speed
-//! - Adjustable spatial density (how compressed the rainbow appears)
-//! - Works with both 1D and 2D layouts
+//! The rainbow pattern creates smooth color transitions across the LED layout.
+//! The colors flow through the full Okhsv spectrum, creating a classic rainbow
+//! visual.
 //!
 //! ## Example
 //!
@@ -17,7 +10,7 @@
 //! use blinksy::{
 //!     ControlBuilder,
 //!     layout1d,
-//!     patterns::{Rainbow, RainbowParams}
+//!     patterns::rainbow::{Rainbow, RainbowParams}
 //! };
 //!
 //! // Define a 1D layout
@@ -46,7 +39,6 @@ use crate::{
 pub struct RainbowParams {
     /// Controls the speed of the animation (higher = faster)
     pub time_scalar: f32,
-
     /// Controls the spatial density of the rainbow (higher = more compressed)
     pub position_scalar: f32,
 }
