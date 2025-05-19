@@ -166,7 +166,7 @@ jobs:
       - name: Fmt
         shell: bash
         working-directory: ./esp
-        run: cargo fmt --all -- -F gl_c_016wl_d  --check
+        run: cargo fmt --all -- --check
 
       - name: Clippy
         shell: bash
