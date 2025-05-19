@@ -33,9 +33,10 @@
 
 <div align="center">
 
-[![crates.io version](https://img.shields.io/crates/v/blinksy.svg?style=flat-square)](https://crates.io/crates/blinksy)
-[![ci status](https://img.shields.io/github/checks-status/ahdinosaur/blinksy/main?style=flat-square)](https://github.com/ahdinosaur/blinksy/actions/workflows/ci.yml?query=branch%3Amain)
-[![chat](https://img.shields.io/matrix/blinksy:matrix.org?style=flat-square&label=chat)](https://matrix.to/#/#blinksy:matrix.org)
+[![GitHub Repo stars](https://img.shields.io/github/stars/ahdinosaur/blinksy?style=flat-square)](https://github.com/ahdinosaur/blinksy)
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/ahdinosaur?style=flat-square)](https://github.com/sponsors/ahdinosaur)
+[![Chat](https://img.shields.io/matrix/blinksy:matrix.org?style=flat-square&label=chat)](https://matrix.to/#/#blinksy:matrix.org)
+[![License](https://img.shields.io/github/license/ahdinosaur/blinksy?style=flat-square)](#license)
 
 </div>
 
@@ -92,10 +93,13 @@ If you want help to support a new target, [make an issue](https://github.com/ahd
 
 ## Modules
 
-- [`blinksy`](./blinksy) : [![crates.io version](https://img.shields.io/crates/v/blinksy.svg?style=flat-square)](https://crates.io/crates/blinksy) [![download](https://img.shields.io/crates/d/blinksy.svg?style=flat-square)](https://crates.io/crates/blinksy) [![docs.rs docs](https://img.shields.io/badge/docs-latest-blue.svg?style=flat-square)](https://docs.rs/blinksy)
-- [`blinksy-desktop`](./blinksy-desktop) : [![crates.io version](https://img.shields.io/crates/v/blinksy-desktop.svg?style=flat-square)](https://crates.io/crates/blinksy-desktop) [![download](https://img.shields.io/crates/d/blinksy-desktop.svg?style=flat-square)](https://crates.io/crates/blinksy-desktop) [![docs.rs docs](https://img.shields.io/badge/docs-latest-blue.svg?style=flat-square)](https://docs.rs/blinksy-desktop)
-- [`blinksy-esp`](./esp/blinksy-esp) : [![crates.io version](https://img.shields.io/crates/v/blinksy-esp.svg?style=flat-square)](https://crates.io/crates/blinksy-esp) [![download](https://img.shields.io/crates/d/blinksy-esp.svg?style=flat-square)](https://crates.io/crates/blinksy-esp) [![docs.rs docs](https://img.shields.io/badge/docs-latest-blue.svg?style=flat-square)](https://docs.rs/blinksy-esp)
-- [`gledopto`](./esp/gledopto) : [![crates.io version](https://img.shields.io/crates/v/gledopto.svg?style=flat-square)](https://crates.io/crates/gledopto) [![download](https://img.shields.io/crates/d/gledopto.svg?style=flat-square)](https://crates.io/crates/gledopto) [![docs.rs docs](https://img.shields.io/badge/docs-latest-blue.svg?style=flat-square)](https://docs.rs/gledopto)
+[![CI status](https://img.shields.io/github/actions/workflow/status/ahdinosaur/blinksy/ci.yml?branch=main&style=flat-square)](https://github.com/ahdinosaur/blinksy/actions/workflows/ci.yml?query=branch%3Amain)
+
+- [`blinksy`](./blinksy) : [![Crates.io version](https://img.shields.io/crates/v/blinksy.svg?style=flat-square)](https://crates.io/crates/blinksy) [![Doc.rs docs](https://img.shields.io/badge/docs-latest-blue.svg?style=flat-square)](https://docs.rs/blinksy) [![Crates.io Downloads (total)](https://img.shields.io/crates/d/blinksy?style=flat-square&label=total%20downloads)](https://crates.io/crates/blinksy) [![Crates.io Downloads (recent)](https://img.shields.io/crates/dr/blinksy?style=flat-square)](https://crates.io/crates/blinksy)
+- [`blinksy-desktop`](./blinksy-desktop) : [![Crates.io version](https://img.shields.io/crates/v/blinksy-desktop.svg?style=flat-square)](https://crates.io/crates/blinksy-desktop) [![Doc.rs docs](https://img.shields.io/badge/docs-latest-blue.svg?style=flat-square)](https://docs.rs/blinksy-desktop) [![Crates.io Downloads (total)](https://img.shields.io/crates/d/blinksy-desktop?style=flat-square&label=total%20downloads)](https://crates.io/crates/blinksy-desktop) [![Crates.io Downloads (recent)](https://img.shields.io/crates/dr/blinksy-desktop?style=flat-square)](https://crates.io/crates/blinksy-desktop)
+- [`blinksy-esp`](./esp/blinksy-esp) : [![Crates.io version](https://img.shields.io/crates/v/blinksy-esp.svg?style=flat-square)](https://crates.io/crates/blinksy-esp) [![Doc.rs docs](https://img.shields.io/badge/docs-latest-blue.svg?style=flat-square)](https://docs.rs/blinksy-esp) [![Crates.io Downloads (total)](https://img.shields.io/crates/d/blinksy-esp?style=flat-square&label=total%20downloads)](https://crates.io/crates/blinksy-esp) [![Crates.io Downloads (recent)](https://img.shields.io/crates/dr/blinksy-esp?style=flat-square)](https://crates.io/crates/blinksy-esp)
+- [`gledopto`](./esp/gledopto) : [![Crates.io version](https://img.shields.io/crates/v/gledopto.svg?style=flat-square)](https://crates.io/crates/gledopto) [![Doc.rs docs](https://img.shields.io/badge/docs-latest-blue.svg?style=flat-square)](https://docs.rs/gledopto) [![Crates.io Downloads (total)](https://img.shields.io/crates/d/gledopto?style=flat-square&label=total%20downloads)](https://crates.io/crates/gledopto) [![Crates.io Downloads (recent)](https://img.shields.io/crates/dr/gledopto?style=flat-square)](https://crates.io/crates/gledopto)
+
 
 ## Examples
 
