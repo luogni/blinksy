@@ -23,8 +23,10 @@
 //!
 //! ### Multi‑Chipset Support
 //!
-//! - **[APA102]**
-//! - **[WS2812B]**
+//! - [clockless](crate::driver::clockless): One-wire (only data, no clock)
+//!   - **[WS2812B]**: Affordable RGB LED, aka NeoPixel
+//! - [clocked](crate::driver::clocked): Two-wire (data and clock)
+//!   - **[APA102]**: High-FPS RGB LED, aka DotStar
 //!
 //! If you want help to support a new chipset, [make an issue](https://github.com/ahdinosaur/blinksy/issues)!
 //!
@@ -33,8 +35,8 @@
 //!
 //! ### Pattern (Effect) Library:
 //!
-//! - **[Rainbow]**
-//! - **[Noise]**
+//! - **[Rainbow]**: A basic scrolling rainbow
+//! - **[Noise]**: A flow through random noise functions.
 //!
 //! If you want help to port a pattern from FastLED / WLED to Rust, [make an issue](https://github.com/ahdinosaur/blinksy/issues)!
 //!

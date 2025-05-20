@@ -3,8 +3,8 @@
 //! A driver is what tells the LED hardware how to be the colors you want.
 //!
 //! - [`Driver`] is the core trait for all drivers
-//! - The [`clocked`] module provides re-usable implementations for clocked (two-wire) protocols (like APA102)
-//! - The [`clockless`] module provides re-usable implementations for clockless (one-wire) protocols (like WS2812)
+//! - The [`clocked`] module provides re-usable implementations for clocked (two-wire) protocols (like [`APA102`](crate::drivers::apa102))
+//! - The [`clockless`] module provides re-usable implementations for clockless (one-wire) protocols (like [`WS2812`](crate::drivers::ws2812))
 
 use crate::color::{ColorCorrection, FromColor};
 

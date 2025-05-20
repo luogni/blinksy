@@ -64,18 +64,22 @@
 
 ### Multi‑Chipset Support
 
-- **[APA102][apa102]**
-- **[WS2812B][ws2812]**
+- [clockless][clockless]: One-wire (only data, no clock)
+  - **[WS2812B][ws2812]**: Affordable RGB LED, aka NeoPixel
+- [clocked][clocked]: Two-wire (data and clock)
+  - **[APA102][apa102]**: High-FPS RGB LED, aka DotStar
 
 If you want help to support a new chipset, [make an issue](https://github.com/ahdinosaur/blinksy/issues)!
 
-[apa102]: https://docs.rs/blinksy/0.2/blinksy/drivers/apa102/index.html
+[clockless]: https://docs.rs/blinksy/0.2/blinksy/driver/clockless/index.html
 [ws2812]: https://docs.rs/blinksy/0.2/blinksy/drivers/ws2812/index.html
+[clocked]: https://docs.rs/blinksy/0.2/blinksy/driver/clocked/index.html
+[apa102]: https://docs.rs/blinksy/0.2/blinksy/drivers/apa102/index.html
 
 ### Pattern (Effect) Library:
 
-- **[Rainbow][rainbow]**
-- **[Noise][noise]**
+- **[Rainbow][rainbow]**: A basic scrolling rainbow
+- **[Noise][noise]**: A flow through random noise functions.
 
 If you want help to port a pattern from FastLED / WLED to Rust, [make an issue](https://github.com/ahdinosaur/blinksy/issues)!
 
