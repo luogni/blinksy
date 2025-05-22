@@ -25,6 +25,11 @@ Select the board by using its respective feature.
 
 https://github.com/user-attachments/assets/1c1cf3a2-f65c-4152-b444-29834ac749ee
 
+<details>
+<summary>
+    Click to see code
+</summary>
+
 ```rust
 #![no_std]
 #![no_main]
@@ -69,9 +74,16 @@ fn main() -> ! {
 }
 ```
 
+</details>
+
 ### 1D WS2812 Strip with Rainbow Pattern
 
 https://github.com/user-attachments/assets/703fe31d-e7ca-4e08-ae2b-7829c0d4d52e
+
+<details>
+<summary>
+    Click to see code
+</summary>
 
 ```rust
 #![no_std]
@@ -108,57 +120,13 @@ fn main() -> ! {
 }
 ```
 
+</details>
+
 ## Getting started
 
-### Pre-requisites
+To quickstart a project, see [`blinksy-quickstart-gledopto`][blinksy-quickstart-gledopto].
 
-- Install Rust with `rustup`
-- Install ESP components
-
-```shell
-cargo install espup
-espup install
-```
-
-- Install `espflash`
-
-```shell
-cargo install espflash
-```
-
-- On Linux, add user to `dialout` group
-
-```shell
-sudo adduser $USER dialout
-```
-
-### Run An Example
-
-Source the ESP environment variables
-
-```shell
-. $HOME/export-esp.sh
-```
-
-(See also: https://docs.esp-rs.org/book/installation/riscv-and-xtensa.html#3-set-up-the-environment-variables )
-
-Clone this repository and go into the `./esp` workspace:
-
-```shell
-git clone git@github.com:ahdinosaur/blinksy
-cd blinksy/esp
-```
-
-Run an example:
-
-```shell
-cargo run --release -p gledopto --example ws2812-strip
-```
-
-To start your own project, use [esp-generate](https://docs.esp-rs.org/book/writing-your-own-application/generate-project/esp-generate.html).
-
-- Enable unstable HAL features: yes
-- Use defmt to print messages: yes
+[blinksy-quickstart-gledopto]: https://github.com/ahdinosaur/blinksy-quickstart-gledopto
 
 ### Resources
 

@@ -104,6 +104,14 @@ If you want help to support a new target, [make an issue](https://github.com/ahd
 - [`blinksy-esp`](./esp/blinksy-esp) : [![Crates.io version](https://img.shields.io/crates/v/blinksy-esp.svg?style=flat-square)](https://crates.io/crates/blinksy-esp) [![Doc.rs docs](https://img.shields.io/badge/docs-latest-blue.svg?style=flat-square)](https://docs.rs/blinksy-esp) [![Crates.io Downloads (total)](https://img.shields.io/crates/d/blinksy-esp?style=flat-square&label=total%20downloads)](https://crates.io/crates/blinksy-esp) [![Crates.io Downloads (recent)](https://img.shields.io/crates/dr/blinksy-esp?style=flat-square)](https://crates.io/crates/blinksy-esp)
 - [`gledopto`](./esp/gledopto) : [![Crates.io version](https://img.shields.io/crates/v/gledopto.svg?style=flat-square)](https://crates.io/crates/gledopto) [![Doc.rs docs](https://img.shields.io/badge/docs-latest-blue.svg?style=flat-square)](https://docs.rs/gledopto) [![Crates.io Downloads (total)](https://img.shields.io/crates/d/gledopto?style=flat-square&label=total%20downloads)](https://crates.io/crates/gledopto) [![Crates.io Downloads (recent)](https://img.shields.io/crates/dr/gledopto?style=flat-square)](https://crates.io/crates/gledopto)
 
+## Quick Start
+
+To quickstart a project, see [`blinksy-quickstart-gledopto`][blinksy-quickstart-gledopto]
+
+To start using the library, see [control][control].
+
+[blinksy-quickstart-gledopto]: https://github.com/ahdinosaur/blinksy-quickstart-gledopto
+[control]: https://docs.rs/blinksy/0.3/blinksy/control/index.html
 
 ## Examples
 

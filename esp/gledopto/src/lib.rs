@@ -19,13 +19,11 @@
 //! - [ ] Alternative "IO33" button
 //! - [ ] Built-in microphone
 //!
-//!
-//!
 //! ## Getting started
 //!
-//! For help to get started, see ["Getting Started"][getting-started] section in README.
+//! To quickstart a project, see [`blinksy-quickstart-gledopto`][blinksy-quickstart-gledopto].
 //!
-//! [getting-started]: https://github.com/ahdinosaur/blinksy/blob/gledopto/v0.3.1/esp/gledopto/README.md
+//! [blinksy-quickstart-gledopto]: https://github.com/ahdinosaur/blinksy-quickstart-gledopto
 //!
 //! ## Examples
 //!

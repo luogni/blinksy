@@ -83,10 +83,14 @@
 //!
 //! ## Getting started
 //!
-//! For more help to get started, see ["Getting Started"][getting-started] section in [`gledopto`][gledopto] README.
+//! For more help to get started, see [`blinksy-quickstart-gledopto`][blinksy-quickstart-gledopto]
+//! project template and [`gledopto`][gledopto] library.
 //!
-//! [gledopto]: https://crates.io/crates/gledopto
-//! [getting-started]: https://github.com/ahdinosaur/blinksy/blob/gledopto/v0.3.1/esp/gledopto/README.md#getting-started
+//! As the Gledopto controller is an ESP32 board, the project template and library should provide
+//! an entry point to understand how to use Blinksy with an ESP board.
+//!
+//! [blinksy-quickstart-gledopto]: https://github.com/ahdinosaur/blinksy-quickstart-gledopto
+//! [gledopto]: https://docs.rs/gledopto/0.3/gledopto
 
 pub mod rmt;
 pub mod time;

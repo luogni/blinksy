@@ -54,7 +54,11 @@
 //!
 //! ## Quick Start
 //!
-//! To get started, see [control].
+//! To quickstart a project, see [`blinksy-quickstart-gledopto`][blinksy-quickstart-gledopto]
+//!
+//! To start using the library, see [control].
+//!
+//! [blinksy-quickstart-gledopto]: https://github.com/ahdinosaur/blinksy-quickstart-gledopto
 //!
 //! ### 1D Strip with Rainbow Pattern
 //!
