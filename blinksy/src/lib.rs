@@ -50,7 +50,7 @@
 //!
 //! If you want help to support a new target, [make an issue](https://github.com/ahdinosaur/blinksy/issues)!
 //!
-//! [Gledopto]: https://docs.rs/gledopto/0.3/gledopto
+//! [Gledopto]: https://docs.rs/gledopto/0.4/gledopto
 //!
 //! ## Quick Start
 //!
