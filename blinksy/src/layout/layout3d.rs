@@ -2,22 +2,22 @@ use core::iter::{once, Once};
 
 use super::iterators::{GridStepIterator, StepIterator};
 
-pub use glam::Vec2;
+pub use glam::Vec3;
 
-/// Enumeration of two-dimensional shape primitives.
+/// Enumeration of three-dimensional shape primitives.
 ///
-/// Each variant represents a different type of 2D arrangement of LEDs.
+/// Each variant represents a different type of 3D arrangement of LEDs.
 #[derive(Debug, Clone)]
-pub enum Shape2d {
+pub enum Shape3d {
     /// A single point at the specified location.
-    Point(Vec2),
+    Point(Vec3),
 
     /// A line of LEDs from `start` to `end` with `pixel_count` LEDs.
     Line {
         /// Starting point of the line
-        start: Vec2,
+        start: Vec3,
         /// Ending point of the line
-        end: Vec2,
+        end: Vec3,
         /// Number of LEDs along the line
         pixel_count: usize,
     },
@@ -25,11 +25,11 @@ pub enum Shape2d {
     /// A grid of LEDs defined by three corners and dimensions.
     Grid {
         /// Starting point (origin) of the grid
-        start: Vec2,
+        start: Vec3,
         /// Ending point for first horizontal row (defines the horizontal axis)
-        horizontal_end: Vec2,
+        horizontal_end: Vec3,
         /// Ending point for first vertical column (defines the vertical axis)
-        vertical_end: Vec2,
+        vertical_end: Vec3,
         /// Number of LEDs along each horizontal row
         horizontal_pixel_count: usize,
         /// Number of LEDs along each vertical column
@@ -41,7 +41,7 @@ pub enum Shape2d {
     /// An arc of LEDs centered at `center` with the specified `radius`.
     Arc {
         /// Center point of the arc
-        center: Vec2,
+        center: Vec3,
         /// Radius of the arc
         radius: f32,
         /// Angular span of the arc in radians
@@ -51,67 +51,26 @@ pub enum Shape2d {
     },
 }
 
-/// Iterator over points in a 2D shape.
-#[derive(Debug)]
-pub enum Shape2dPointsIterator {
-    /// Iterator for a single point
-    Point(Once<Vec2>),
-    /// Iterator for points along a line
-    Line(StepIterator<Vec2, f32>),
-    /// Iterator for points in a grid
-    Grid(GridStepIterator<Vec2, f32>),
-}
-
-impl Iterator for Shape2dPointsIterator {
-    type Item = Vec2;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        match self {
-            Shape2dPointsIterator::Point(iter) => iter.next(),
-            Shape2dPointsIterator::Line(iter) => iter.next(),
-            Shape2dPointsIterator::Grid(iter) => iter.next(),
-        }
-    }
-}
-
-impl From<Once<Vec2>> for Shape2dPointsIterator {
-    fn from(value: Once<Vec2>) -> Self {
-        Shape2dPointsIterator::Point(value)
-    }
-}
-
-impl From<StepIterator<Vec2, f32>> for Shape2dPointsIterator {
-    fn from(value: StepIterator<Vec2, f32>) -> Self {
-        Shape2dPointsIterator::Line(value)
-    }
-}
-
-impl From<GridStepIterator<Vec2, f32>> for Shape2dPointsIterator {
-    fn from(value: GridStepIterator<Vec2, f32>) -> Self {
-        Shape2dPointsIterator::Grid(value)
-    }
-}
-
-impl Shape2d {
+impl Shape3d {
     /// Returns the total number of pixels (LEDs) in this shape.
     pub const fn pixel_count(&self) -> usize {
         match *self {
-            Shape2d::Point(_) => 1,
-            Shape2d::Line { pixel_count, .. } => pixel_count,
-            Shape2d::Grid {
+            Shape3d::Point(_) => 1,
+            Shape3d::Line { pixel_count, .. } => pixel_count,
+            Shape3d::Grid {
                 horizontal_pixel_count,
                 vertical_pixel_count,
                 ..
             } => horizontal_pixel_count * vertical_pixel_count,
-            Shape2d::Arc { pixel_count, .. } => pixel_count,
+            Shape3d::Arc { pixel_count, .. } => pixel_count,
         }
     }
 
     /// Returns an iterator over all points (LED positions) in this shape.
-    pub fn points(&self) -> Shape2dPointsIterator {
+    pub fn points(&self) -> Shape3dPointsIterator {
         match *self {
-            Shape2d::Point(point) => once(point).into(),
-            Shape2d::Line {
+            Shape3d::Point(point) => once(point).into(),
+            Shape3d::Line {
                 start,
                 end,
                 pixel_count,
@@ -119,7 +78,7 @@ impl Shape2d {
                 let step = (start - end) / pixel_count as f32;
                 StepIterator::new(start, step, pixel_count).into()
             }
-            Shape2d::Grid {
+            Shape3d::Grid {
                 start,
                 horizontal_end,
                 vertical_end,
@@ -141,7 +100,7 @@ impl Shape2d {
                 )
                 .into()
             }
-            Shape2d::Arc {
+            Shape3d::Arc {
                 center: _,
                 radius: _,
                 angle_in_radians: _,
@@ -151,71 +110,86 @@ impl Shape2d {
     }
 }
 
-/// Trait for two-dimensional LED layouts.
+/// Trait for three-dimensional LED layouts.
 ///
-/// Implementors of this trait represent a 2D arrangement of LEDs using one or more shapes.
+/// Implementors of this trait represent a 3D arrangement of LEDs using one or more shapes.
 ///
-/// Use [`layout2d!`](crate::layout2d) to define a type that implements [`Layout2d`].
+/// Use [`layout3d!`](crate::layout3d) to define a type that implements [`Layout3d`].
 ///
-/// For our 2D space, we can think of:
+/// For our 3D space, we can think of:
 ///
-/// - `(-1.0, -1.0)` as the left bottom
-/// - `(1.0, -1.0)` as the right bottom
-/// - `(-1.0, 1.0)` as the left top
-/// - `(1.0, 1.0)` as the right top
-pub trait Layout2d {
+/// - `(-1.0, -1.0, -1.0)` as the left bottom back
+/// - `(-1.0, -1.0, 1.0)` as the left bottom front
+/// - `(1.0, -1.0, -1.0)` as the right bottom back
+/// - `(1.0, -1.0, 1.0)` as the right bottom front
+/// - `(-1.0, 1.0, -1.0)` as the left top back
+/// - `(-1.0, 1.0, 1.0)` as the left top front
+/// - `(1.0, 1.0, -1.0)` as the right top back
+/// - `(1.0, 1.0, 1.0)` as the right top front
+pub trait Layout3d {
     /// The total number of LEDs in this layout.
     const PIXEL_COUNT: usize;
 
     /// Returns an iterator over the shapes that make up this layout.
-    fn shapes() -> impl Iterator<Item = Shape2d>;
+    fn shapes() -> impl Iterator<Item = Shape3d>;
 
     /// Returns an iterator over all points (LED positions) in this layout.
-    fn points() -> impl Iterator<Item = Vec2> {
+    fn points() -> impl Iterator<Item = Vec3> {
         Self::shapes().flat_map(|s| s.points())
     }
 }
 
-/// Creates a two-dimensional LED layout from a collection of shapes.
-///
-/// # Arguments
-///
-/// * `#[$attr]` - Optional attributes to apply to the struct (e.g., `#[derive(Debug)]`)
-/// * `$vis` - Optional visibility modifier (e.g., `pub`)
-/// * `$name` - The name of the layout type to create
-/// * `[$($shape:expr),*]` - A list of Shape2d instances defining the layout
-///
-/// # Output
-///
-/// Macro output will be a type definition that implements [`Layout2d`].
-///
-/// # Example
-///
-/// ```rust
-/// use blinksy::{layout2d, layout::Shape2d, layout::Vec2};
-///
-/// layout2d!(
-///     Layout,
-///     [Shape2d::Grid {
-///         start: Vec2::new(-1., -1.),
-///         horizontal_end: Vec2::new(1., -1.),
-///         vertical_end: Vec2::new(-1., 1.),
-///         horizontal_pixel_count: 16,
-///         vertical_pixel_count: 16,
-///         serpentine: true,
-///     }]
-/// );
-/// ```
+/// Iterator over points in a 3D shape.
+#[derive(Debug)]
+pub enum Shape3dPointsIterator {
+    /// Iterator for a single point
+    Point(Once<Vec3>),
+    /// Iterator for points along a line
+    Line(StepIterator<Vec3, f32>),
+    /// Iterator for points in a grid
+    Grid(GridStepIterator<Vec3, f32>),
+}
+
+impl Iterator for Shape3dPointsIterator {
+    type Item = Vec3;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        match self {
+            Shape3dPointsIterator::Point(iter) => iter.next(),
+            Shape3dPointsIterator::Line(iter) => iter.next(),
+            Shape3dPointsIterator::Grid(iter) => iter.next(),
+        }
+    }
+}
+
+impl From<Once<Vec3>> for Shape3dPointsIterator {
+    fn from(value: Once<Vec3>) -> Self {
+        Shape3dPointsIterator::Point(value)
+    }
+}
+
+impl From<StepIterator<Vec3, f32>> for Shape3dPointsIterator {
+    fn from(value: StepIterator<Vec3, f32>) -> Self {
+        Shape3dPointsIterator::Line(value)
+    }
+}
+
+impl From<GridStepIterator<Vec3, f32>> for Shape3dPointsIterator {
+    fn from(value: GridStepIterator<Vec3, f32>) -> Self {
+        Shape3dPointsIterator::Grid(value)
+    }
+}
+
 #[macro_export]
-macro_rules! layout2d {
+macro_rules! layout3d {
     ($(#[$attr:meta])* $vis:vis $name:ident, [$($shape:expr),* $(,)?]) => {
         $(#[$attr])*
         $vis struct $name;
 
-        impl $crate::layout::Layout2d for $name {
+        impl $crate::layout::Layout3d for $name {
             const PIXEL_COUNT: usize = 0 $(+ $shape.pixel_count())*;
 
-            fn shapes() -> impl Iterator<Item = $crate::layout::Shape2d> {
+            fn shapes() -> impl Iterator<Item = $crate::layout::Shape3d> {
                 [$($shape),*].into_iter()
             }
         }
