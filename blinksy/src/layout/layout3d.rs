@@ -1,6 +1,8 @@
 use core::iter::{once, Once};
 
-use super::iterators::{GridStepIterator, StepIterator};
+use crate::layout::ArcStepIterator;
+
+use super::iterators::{GridStepIterator, LineStepIterator};
 
 pub use glam::Vec3;
 
@@ -38,15 +40,55 @@ pub enum Shape3d {
         serpentine: bool,
     },
 
-    /// An arc of LEDs centered at `center` with the specified `radius`.
+    /// An circular or elliptical arc in 3D.
+    ///
+    /// Parametric form:
+    ///
+    /// ```text
+    /// point(theta) = center + cos(theta) * axis_u + sin(theta) * axis_v
+    /// ```
+    ///
+    /// Plane and orientation:
+    ///
+    /// - The arc lies in the plane spanned by `axis_u` and `axis_v`.
+    /// - `axis_u` and `axis_v` must be non-colinear (not scalar multiples).
+    /// - Theta = 0 lies along `axis_u` (i.e. `center + axis_u`)
+    ///   - As theta increases, the point moves towards `axis_v`.
+    /// - Looking along `axis_u x axis_v`, rotation is counter-clockwise. Swap the two axes to flip direction.
+    /// - To make a full circle/ellipse, set end = start + [core::f32::consts::TAU].
+    ///
+    /// How to choose `axis_u` / `axis_v`:
+    ///
+    /// - Circle of radius `r` in the XY plane:
+    ///   - `axis_u = (r, 0, 0)`
+    ///   - `axis_v = (0, r, 0)`
+    /// - Circle of radius `r` in an arbitrary plane with unit basis `u`, `v`:
+    ///   - `axis_u = r * u`
+    ///   - `axis_v = r * v`
+    /// - Ellipse with radii `rx`, `ry` in a plane with unit basis `u`, `v`:
+    ///   - `axis_u = rx * u`
+    ///   - `axis_v = ry * v`
+    ///
+    /// Notes:
+    ///
+    /// - Axes don’t need to be unit length or perpendicular; their lengths set the ellipse radii along their directions.
+    /// - The points returned by `shape::points()` of a `Shape3d::Arc`:
+    ///   - Will have uniform density if a circular arc
+    ///   - Will **not** have uniform density if an elliptical arc, as the points correspond to `theta`.
+    ///
+    /// [`TAU`]: https://doc.rust-lang.org/core/f32/consts/constant.TAU.html
     Arc {
-        /// Center point of the arc
+        /// Center of the ellipse
         center: Vec3,
-        /// Radius of the arc
-        radius: f32,
-        /// Angular span of the arc in radians
-        angle_in_radians: f32,
-        /// Number of LEDs along the arc
+        /// Cosine-axis vector
+        axis_u: Vec3,
+        /// Sine-axis vector
+        axis_v: Vec3,
+        /// Start angle in radians
+        start_angle_in_radians: f32,
+        /// End angle in radians
+        end_angle_in_radians: f32,
+        /// Number of LEDs
         pixel_count: usize,
     },
 }
@@ -76,7 +118,7 @@ impl Shape3d {
                 pixel_count,
             } => {
                 let step = (end - start) / ((pixel_count - 1) as f32).max(1.);
-                StepIterator::new(start, step, pixel_count).into()
+                LineStepIterator::new(start, step, pixel_count).into()
             }
             Shape3d::Grid {
                 start,
@@ -101,11 +143,21 @@ impl Shape3d {
                 .into()
             }
             Shape3d::Arc {
-                center: _,
-                radius: _,
-                angle_in_radians: _,
-                pixel_count: _,
-            } => todo!(),
+                center,
+                axis_u,
+                axis_v,
+                start_angle_in_radians,
+                end_angle_in_radians,
+                pixel_count,
+            } => ArcStepIterator::new(
+                center,
+                axis_u,
+                axis_v,
+                start_angle_in_radians,
+                end_angle_in_radians,
+                pixel_count,
+            )
+            .into(),
         }
     }
 }
@@ -145,9 +197,11 @@ pub enum Shape3dPointsIterator {
     /// Iterator for a single point
     Point(Once<Vec3>),
     /// Iterator for points along a line
-    Line(StepIterator<Vec3, f32>),
+    Line(LineStepIterator<Vec3, f32>),
     /// Iterator for points in a grid
     Grid(GridStepIterator<Vec3, f32>),
+    /// Iterator for points in a grid
+    Arc(ArcStepIterator<Vec3>),
 }
 
 impl Iterator for Shape3dPointsIterator {
@@ -158,6 +212,7 @@ impl Iterator for Shape3dPointsIterator {
             Shape3dPointsIterator::Point(iter) => iter.next(),
             Shape3dPointsIterator::Line(iter) => iter.next(),
             Shape3dPointsIterator::Grid(iter) => iter.next(),
+            Shape3dPointsIterator::Arc(iter) => iter.next(),
         }
     }
 }
@@ -168,8 +223,8 @@ impl From<Once<Vec3>> for Shape3dPointsIterator {
     }
 }
 
-impl From<StepIterator<Vec3, f32>> for Shape3dPointsIterator {
-    fn from(value: StepIterator<Vec3, f32>) -> Self {
+impl From<LineStepIterator<Vec3, f32>> for Shape3dPointsIterator {
+    fn from(value: LineStepIterator<Vec3, f32>) -> Self {
         Shape3dPointsIterator::Line(value)
     }
 }
@@ -177,6 +232,12 @@ impl From<StepIterator<Vec3, f32>> for Shape3dPointsIterator {
 impl From<GridStepIterator<Vec3, f32>> for Shape3dPointsIterator {
     fn from(value: GridStepIterator<Vec3, f32>) -> Self {
         Shape3dPointsIterator::Grid(value)
+    }
+}
+
+impl From<ArcStepIterator<Vec3>> for Shape3dPointsIterator {
+    fn from(value: ArcStepIterator<Vec3>) -> Self {
+        Shape3dPointsIterator::Arc(value)
     }
 }
 
