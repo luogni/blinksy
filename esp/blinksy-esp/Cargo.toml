@@ -1,6 +1,6 @@
 [package]
 name = "blinksy-esp"
-version = "0.6.0"
+version = "0.7.0"
 edition = "2021"
 
 rust-version.workspace = true
@@ -13,7 +13,7 @@ keywords = ["blinksy", "embedded", "no-std", "esp32"]
 categories.workspace = true
 
 [dependencies]
-blinksy = { path = "../../blinksy", version = "0.6" }
+blinksy = { path = "../../blinksy", version = "0.7" }
 esp-hal = { version = "1.0.0-beta.0", default-features = false, features = ["defmt", "unstable"] }
 defmt = "0.3.10"
 
