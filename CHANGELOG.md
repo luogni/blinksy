@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.8
+
+Migration guide (0.7 -> 0.8)
+
+- `rust-version` has been increased to 1.88, to follow `esp-hal`.
+- You should upgrade to `espflash@4`, which will also require adding bootloader metadata via a macro.
+  - See `gledopto` library and examples for `bootloader!()` on how to easily do this.
+  - See [`esp-hal-1.0.0-rc.0` release](https://github.com/esp-rs/esp-hal/releases/tag/esp-hal-v1.0.0-rc.0) for "Special migration note" about this.
+
+Breaking changes:
+
+- [#66](https://github.com/ahdinosaur/blinksy/pull/66): Upgrade to esp-hal-1.0.0-rc.0
+
 ## 0.7
 
 Migration guide (0.6 -> 0.7)

@@ -136,7 +136,7 @@ To quickstart a project, see [`blinksy-quickstart-gledopto`][blinksy-quickstart-
 As the Gledopto controller is an ESP32, if you want to get started here are some more resources to help:
 
 - [The Rust on ESP Book](https://docs.esp-rs.org/book/introduction.html): An overall guide on ESP32 on Rust
-- [esp-hal](https://docs.espressif.com/projects/rust/esp-hal/1.0.0-beta.0/esp32/esp_hal/index.html): The Hardware Abstraction Layer for an ESP32 on Rust
+- [esp-hal](https://docs.espressif.com/projects/rust/esp-hal/1.0.0-rc.0/esp32/esp_hal/index.html): The Hardware Abstraction Layer for an ESP32 on Rust
 - [espup](https://docs.esp-rs.org/book/installation/riscv-and-xtensa.html): How to install the Xtensa target for Rust, required for ESP32
 - [esp-generate](https://docs.esp-rs.org/book/writing-your-own-application/generate-project/esp-generate.html): A template to help you kickstart your project
 
