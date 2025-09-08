@@ -1,5 +1,33 @@
 # Changelog
 
+## 0.10
+
+Yee haw `blinksy` now supports async!
+
+Migration guide (0.9 -> 0.10)
+
+- You can now add the `async` feature and use async drivers.
+  - For `gledopto`, add the `embassy` feature and use the `embassy_main` entry.
+  - See examples for async usage.
+- For projects using `gledopto` macros: no known breaking changes.
+- For projects using `blinksy-esp`: `create_rmt_buffer!` macro no longer needs $num_leds.
+- For projects using `blinksy` internals, changes:
+  - Renamed `dimensions` module to `markers`
+    - `dimension::Dim1d` -> `markers::Dim1d`
+    - `dimension::Dim2d` -> `markers::Dim2d`
+  - Move `dimension::LayoutForDim` to `layout::LayoutForDim`
+  - Un-pub-ify internal functions within drivers
+
+Breaking changes
+
+- [#54](https://github.com/ahdinosaur/blinksy/pull/54): Add async drivers
+
+Bug fixes:
+
+- [#73](https://github.com/ahdinosaur/blinksy/pull/73): Fix APA102 color correction
+- [#74](https://github.com/ahdinosaur/blinksy/pull/74): Remove extranaeous docstring
+- [#75](https://github.com/ahdinosaur/blinksy/pull/75): Fix color temperature
+
 ## 0.9
 
 Migration guide (0.8 -> 0.9)

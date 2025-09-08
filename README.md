@@ -47,11 +47,11 @@
   - The pattern will compute colors for each LED based on its position
 - Setup a [`driver`][driver] to send each frame of colors to your LEDs, using our built-in [`drivers`][drivers] library.
 
-[layout]: https://docs.rs/blinksy/0.9/blinksy/layout/index.html
-[pattern]: https://docs.rs/blinksy/0.9/blinksy/pattern/index.html
-[patterns]: https://docs.rs/blinksy/0.9/blinksy/patterns/index.html
-[driver]: https://docs.rs/blinksy/0.9/blinksy/driver/index.html
-[drivers]: https://docs.rs/blinksy/0.9/blinksy/drivers/index.html
+[layout]: https://docs.rs/blinksy/0.10/blinksy/layout/index.html
+[pattern]: https://docs.rs/blinksy/0.10/blinksy/pattern/index.html
+[patterns]: https://docs.rs/blinksy/0.10/blinksy/patterns/index.html
+[driver]: https://docs.rs/blinksy/0.10/blinksy/driver/index.html
+[drivers]: https://docs.rs/blinksy/0.10/blinksy/drivers/index.html
 
 ## Features
 
@@ -72,10 +72,10 @@
 
 If you want help to support a new chipset, [make an issue](https://github.com/ahdinosaur/blinksy/issues)!
 
-[clockless]: https://docs.rs/blinksy/0.9/blinksy/driver/clockless/index.html
-[ws2812]: https://docs.rs/blinksy/0.9/blinksy/drivers/ws2812/index.html
-[clocked]: https://docs.rs/blinksy/0.9/blinksy/driver/clocked/index.html
-[apa102]: https://docs.rs/blinksy/0.9/blinksy/drivers/apa102/index.html
+[clockless]: https://docs.rs/blinksy/0.10/blinksy/driver/clockless/index.html
+[ws2812]: https://docs.rs/blinksy/0.10/blinksy/drivers/ws2812/index.html
+[clocked]: https://docs.rs/blinksy/0.10/blinksy/driver/clocked/index.html
+[apa102]: https://docs.rs/blinksy/0.10/blinksy/drivers/apa102/index.html
 
 ### Pattern (Effect) Library:
 
@@ -84,8 +84,8 @@ If you want help to support a new chipset, [make an issue](https://github.com/ah
 
 If you want help to port a pattern from FastLED / WLED to Rust, [make an issue](https://github.com/ahdinosaur/blinksy/issues)!
 
-[rainbow]: https://docs.rs/blinksy/0.9/blinksy/patterns/rainbow/index.html
-[noise]: https://docs.rs/blinksy/0.9/blinksy/patterns/noise/index.html
+[rainbow]: https://docs.rs/blinksy/0.10/blinksy/patterns/rainbow/index.html
+[noise]: https://docs.rs/blinksy/0.10/blinksy/patterns/noise/index.html
 
 ### Board Support Packages
 
@@ -94,7 +94,7 @@ If you want help to port a pattern from FastLED / WLED to Rust, [make an issue](
 
 If you want help to support a new target, [make an issue](https://github.com/ahdinosaur/blinksy/issues)!
 
-[gledopto]: https://docs.rs/gledopto/0.9/gledopto
+[gledopto]: https://docs.rs/gledopto/0.10/gledopto
 
 ## Modules
 
@@ -116,7 +116,7 @@ To start using the library, see [control][control].
 
 [blinksy-quickstart-1d-rope]: https://github.com/ahdinosaur/blinksy-quickstart-1d-rope
 [blinksy-quickstart-3d-grid]: https://github.com/ahdinosaur/blinksy-quickstart-3d-grid
-[control]: https://docs.rs/blinksy/0.9/blinksy/control/index.html
+[control]: https://docs.rs/blinksy/0.10/blinksy/control/index.html
 
 ## Examples
 
