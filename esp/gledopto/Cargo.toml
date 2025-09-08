@@ -75,4 +75,4 @@ mock = [
 
 [package.metadata.docs.rs]
 default-target = "riscv32imac-unknown-none-elf"
-features       = ["mock"]
+features       = ["mock", "embassy"]

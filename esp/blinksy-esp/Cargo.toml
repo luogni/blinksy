@@ -55,4 +55,4 @@ esp32s3 = [
 
 [package.metadata.docs.rs]
 default-target = "riscv32imac-unknown-none-elf"
-features = ["esp32c6"]
+features = ["esp32c6", "async"]
