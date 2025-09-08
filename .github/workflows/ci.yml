@@ -53,6 +53,10 @@ jobs:
         shell: bash
         run: cargo check
 
+      - name: Check async
+        shell: bash
+        run: cargo check --features async
+
       - name: Test
         shell: bash
         run: cargo test
@@ -90,6 +94,11 @@ jobs:
         working-directory: ./esp
         run: cargo +${{ matrix.device.toolchain }} check -p blinksy-esp -F ${{ matrix.device.soc }}
 
+      - name: Check blinksy-esp (async feature)
+        shell: bash
+        working-directory: ./esp
+        run: cargo +${{ matrix.device.toolchain }} check -p blinksy-esp -F ${{ matrix.device.soc }},async
+
   gledopto:
     runs-on: ubuntu-latest
     env:
@@ -121,6 +130,11 @@ jobs:
         shell: bash
         working-directory: ./esp
         run: cargo +${{ matrix.device.toolchain }} check -p gledopto -F ${{ matrix.device.board }}
+
+      - name: Check gledopto (embassy feature)
+        shell: bash
+        working-directory: ./esp
+        run: cargo +${{ matrix.device.toolchain }} check -p gledopto -F ${{ matrix.device.board }},embassy
 
   lint:
     runs-on: ubuntu-latest
