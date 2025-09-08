@@ -1,8 +1,8 @@
 //! # Desktop Simulation Driver
 //!
 //! This module provides a graphical simulation of LED layouts and patterns for desktop development
-//! and debugging. It implements the [`Driver`] trait, allowing it to be used as a drop-in
-//! replacement for physical LED hardware.
+//! and debugging. It provides an implementation of the [`Driver`] trait, allowing it to be used as
+//! a drop-in replacement for physical LED hardware.
 //!
 //! The simulator creates a 3D visualization window where:
 //!
@@ -30,7 +30,7 @@
 //!
 //! // Define your layout
 //! layout2d!(
-//!     Layout,
+//!     PanelLayout,
 //!     [Shape2d::Grid {
 //!         start: Vec2::new(-1., -1.),
 //!         horizontal_end: Vec2::new(1., -1.),
@@ -41,18 +41,20 @@
 //!     }]
 //! );
 //!
-//! // Create a control using the Desktop driver instead of physical hardware
-//! let mut control = ControlBuilder::new_2d()
-//!     .with_layout::<Layout>()
-//!     .with_pattern::<Rainbow>(RainbowParams::default())
-//!     .with_driver(Desktop::new_2d::<Layout>())
-//!     .build();
+//! Desktop::new_2d::<PanelLayout>().start(|driver| {
+//!     // Create a control using the Desktop driver instead of physical hardware
+//!     let mut control = ControlBuilder::new_2d()
+//!         .with_layout::<PanelLayout>()
+//!         .with_pattern::<Rainbow>(RainbowParams::default())
+//!         .with_driver(driver)
+//!         .build();
 //!
-//! // Run your normal animation loop
-//! loop {
-//!     control.tick(elapsed_in_ms()).unwrap();
-//!     std::thread::sleep(std::time::Duration::from_millis(16));
-//! }
+//!     // Run your normal animation loop
+//!     loop {
+//!         control.tick(elapsed_in_ms()).unwrap();
+//!         std::thread::sleep(std::time::Duration::from_millis(16));
+//!     }
+//! });
 //! ```
 //!
 //! [`Driver`]: blinksy::driver::Driver
@@ -110,26 +112,22 @@ impl Default for DesktopConfig {
     }
 }
 
-/// Desktop driver for simulating LED layouts in a desktop window.
+/// Desktop simulator for LED layouts in a desktop window.
 ///
-/// This struct implements the `Driver` trait and renders a visual
-/// representation of your LED layout using miniquad.
+/// Provides a visual representation of your LED layout using miniquad,
+/// with a `Driver` to render updates.
 ///
 /// # Type Parameters
 ///
-/// * `Dim` - The dimension marker (Dim1d or Dim2d)
+/// * `Dim` - The dimension marker (Dim1d or Dim2d or Dim3d)
 /// * `Layout` - The specific layout type
 pub struct Desktop<Dim, Layout> {
-    dim: PhantomData<Dim>,
-    layout: PhantomData<Layout>,
-    brightness: f32,
-    correction: ColorCorrection,
-    sender: Sender<LedMessage>,
-    is_window_closed: std::sync::Arc<std::sync::atomic::AtomicBool>,
+    driver: DesktopDriver<Dim, Layout>,
+    stage: DesktopStageOptions,
 }
 
 impl Desktop<Dim1d, ()> {
-    /// Creates a new graphics driver for 1D layouts.
+    /// Creates a new graphics simulator for 1D layouts.
     ///
     /// This method initializes a rendering window showing a linear strip of LEDs.
     ///
@@ -139,7 +137,7 @@ impl Desktop<Dim1d, ()> {
     ///
     /// # Returns
     ///
-    /// A Desktop driver configured for the specified 1D layout
+    /// A Desktop simulator configured for the specified 1D layout
     pub fn new_1d<Layout>() -> Desktop<Dim1d, Layout>
     where
         Layout: Layout1d,
@@ -147,7 +145,7 @@ impl Desktop<Dim1d, ()> {
         Self::new_1d_with_config::<Layout>(DesktopConfig::default())
     }
 
-    /// Creates a new graphics driver for 1D layouts with custom configuration.
+    /// Creates a new graphics simulator for 1D layouts with custom configuration.
     ///
     /// # Type Parameters
     ///
@@ -159,7 +157,7 @@ impl Desktop<Dim1d, ()> {
     ///
     /// # Returns
     ///
-    /// A Desktop driver configured for the specified 1D layout
+    /// A Desktop simulator configured for the specified 1D layout
     pub fn new_1d_with_config<Layout>(config: DesktopConfig) -> Desktop<Dim1d, Layout>
     where
         Layout: Layout1d,
@@ -173,25 +171,27 @@ impl Desktop<Dim1d, ()> {
         let is_window_closed = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
         let is_window_closed_2 = is_window_closed.clone();
 
-        std::thread::spawn(move || {
-            DesktopStage::start(move || {
-                DesktopStage::new(positions, receiver, config, is_window_closed_2)
-            });
-        });
-
-        Desktop {
+        let driver = DesktopDriver {
             dim: PhantomData,
             layout: PhantomData,
             brightness: 1.0,
             correction: ColorCorrection::default(),
             sender,
             is_window_closed,
-        }
+        };
+        let stage = DesktopStageOptions {
+            positions,
+            receiver,
+            config,
+            is_window_closed: is_window_closed_2,
+        };
+
+        Desktop { driver, stage }
     }
 }
 
 impl Desktop<Dim2d, ()> {
-    /// Creates a new graphics driver for 2D layouts.
+    /// Creates a new graphics simulator for 2D layouts.
     ///
     /// This method initializes a rendering window showing a 2D arrangement of LEDs
     /// based on the layout's coordinates.
@@ -202,7 +202,7 @@ impl Desktop<Dim2d, ()> {
     ///
     /// # Returns
     ///
-    /// A Desktop driver configured for the specified 2D layout
+    /// A Desktop simulator configured for the specified 2D layout
     pub fn new_2d<Layout>() -> Desktop<Dim2d, Layout>
     where
         Layout: Layout2d,
@@ -210,7 +210,7 @@ impl Desktop<Dim2d, ()> {
         Self::new_2d_with_config::<Layout>(DesktopConfig::default())
     }
 
-    /// Creates a new graphics driver for 2D layouts with custom configuration.
+    /// Creates a new graphics simulator for 2D layouts with custom configuration.
     ///
     /// # Type Parameters
     ///
@@ -222,7 +222,7 @@ impl Desktop<Dim2d, ()> {
     ///
     /// # Returns
     ///
-    /// A Desktop driver configured for the specified 2D layout
+    /// A Desktop simulator configured for the specified 2D layout
     pub fn new_2d_with_config<Layout>(config: DesktopConfig) -> Desktop<Dim2d, Layout>
     where
         Layout: Layout2d,
@@ -236,25 +236,27 @@ impl Desktop<Dim2d, ()> {
         let is_window_closed = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
         let is_window_closed_2 = is_window_closed.clone();
 
-        std::thread::spawn(move || {
-            DesktopStage::start(move || {
-                DesktopStage::new(positions, receiver, config, is_window_closed_2)
-            });
-        });
-
-        Desktop {
+        let driver = DesktopDriver {
             dim: PhantomData,
             layout: PhantomData,
             brightness: 1.0,
             correction: ColorCorrection::default(),
             sender,
             is_window_closed,
-        }
+        };
+        let stage = DesktopStageOptions {
+            positions,
+            receiver,
+            config,
+            is_window_closed: is_window_closed_2,
+        };
+
+        Desktop { driver, stage }
     }
 }
 
 impl Desktop<Dim3d, ()> {
-    /// Creates a new graphics driver for 3D layouts.
+    /// Creates a new graphics simulator for 3D layouts.
     ///
     /// This method initializes a rendering window showing a 3D arrangement of LEDs
     /// based on the layout's coordinates.
@@ -265,7 +267,7 @@ impl Desktop<Dim3d, ()> {
     ///
     /// # Returns
     ///
-    /// A Desktop driver configured for the specified 3D layout
+    /// A Desktop simulator configured for the specified 3D layout
     pub fn new_3d<Layout>() -> Desktop<Dim3d, Layout>
     where
         Layout: Layout3d,
@@ -273,7 +275,7 @@ impl Desktop<Dim3d, ()> {
         Self::new_3d_with_config::<Layout>(DesktopConfig::default())
     }
 
-    /// Creates a new graphics driver for 3D layouts with custom configuration.
+    /// Creates a new graphics simulator for 3D layouts with custom configuration.
     ///
     /// # Type Parameters
     ///
@@ -285,7 +287,7 @@ impl Desktop<Dim3d, ()> {
     ///
     /// # Returns
     ///
-    /// A Desktop driver configured for the specified 3D layout
+    /// A Desktop simulator configured for the specified 3D layout
     pub fn new_3d_with_config<Layout>(config: DesktopConfig) -> Desktop<Dim3d, Layout>
     where
         Layout: Layout3d,
@@ -299,24 +301,60 @@ impl Desktop<Dim3d, ()> {
         let is_window_closed = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
         let is_window_closed_2 = is_window_closed.clone();
 
-        std::thread::spawn(move || {
-            DesktopStage::start(move || {
-                DesktopStage::new(positions, receiver, config, is_window_closed_2)
-            });
-        });
-
-        Desktop {
+        let driver = DesktopDriver {
             dim: PhantomData,
             layout: PhantomData,
             brightness: 1.0,
             correction: ColorCorrection::default(),
             sender,
             is_window_closed,
-        }
+        };
+        let stage = DesktopStageOptions {
+            positions,
+            receiver,
+            config,
+            is_window_closed: is_window_closed_2,
+        };
+
+        Desktop { driver, stage }
     }
 }
 
-impl<Dim, Layout> Desktop<Dim, Layout> {
+impl<Dim, Layout> Desktop<Dim, Layout>
+where
+    Dim: 'static + Send,
+    Layout: 'static + Send,
+{
+    pub fn start<F>(self, f: F)
+    where
+        F: 'static + FnOnce(DesktopDriver<Dim, Layout>) + Send,
+    {
+        let Self { driver, stage } = self;
+
+        std::thread::spawn(move || f(driver));
+
+        DesktopStage::start(move || DesktopStage::new(stage));
+    }
+}
+
+/// Desktop driver for simulating LED layouts in a desktop window.
+///
+/// This struct implements the `Driver` trait.
+///
+/// # Type Parameters
+///
+/// * `Dim` - The dimension marker (Dim1d or Dim2d or Dim3d)
+/// * `Layout` - The specific layout type
+pub struct DesktopDriver<Dim, Layout> {
+    dim: PhantomData<Dim>,
+    layout: PhantomData<Layout>,
+    brightness: f32,
+    correction: ColorCorrection,
+    sender: Sender<LedMessage>,
+    is_window_closed: std::sync::Arc<std::sync::atomic::AtomicBool>,
+}
+
+impl<Dim, Layout> DesktopDriver<Dim, Layout> {
     fn send(&self, message: LedMessage) -> Result<(), DesktopError> {
         if self
             .is_window_closed
@@ -371,7 +409,7 @@ enum LedMessage {
     Quit,
 }
 
-impl<Dim, Layout> Driver for Desktop<Dim, Layout>
+impl<Dim, Layout> Driver for DesktopDriver<Dim, Layout>
 where
     Layout: LayoutForDim<Dim>,
 {
@@ -408,7 +446,7 @@ where
     }
 }
 
-impl<Dim, Layout> Drop for Desktop<Dim, Layout> {
+impl<Dim, Layout> Drop for DesktopDriver<Dim, Layout> {
     fn drop(&mut self) {
         let _ = self.send(LedMessage::Quit);
     }
@@ -915,6 +953,14 @@ impl Renderer {
     }
 }
 
+/// Constructor options for `DesktopStage`.
+struct DesktopStageOptions {
+    pub positions: Vec<Vec3>,
+    pub receiver: Receiver<LedMessage>,
+    pub config: DesktopConfig,
+    pub is_window_closed: std::sync::Arc<std::sync::atomic::AtomicBool>,
+}
+
 /// The rendering stage that handles the miniquad window and OpenGL drawing.
 struct DesktopStage {
     ctx: Box<dyn RenderingBackend>,
@@ -953,12 +999,14 @@ impl DesktopStage {
     }
 
     /// Create a new DesktopStage with the given LED positions, colors, and configuration.
-    pub fn new(
-        positions: Vec<Vec3>,
-        receiver: Receiver<LedMessage>,
-        config: DesktopConfig,
-        is_window_closed: std::sync::Arc<std::sync::atomic::AtomicBool>,
-    ) -> Self {
+    fn new(options: DesktopStageOptions) -> Self {
+        let DesktopStageOptions {
+            positions,
+            receiver,
+            config,
+            is_window_closed,
+        } = options;
+
         let mut ctx: Box<dyn RenderingBackend> = window::new_rendering_backend();
 
         // Initialize UI manager

@@ -9,22 +9,24 @@ use blinksy_desktop::{
 };
 use std::{thread::sleep, time::Duration};
 
+layout1d!(StripLayout, 30);
+
 fn main() {
-    layout1d!(Layout, 30);
+    Desktop::new_1d::<StripLayout>().start(|driver| {
+        let mut control = ControlBuilder::new_1d()
+            .with_layout::<StripLayout>()
+            .with_pattern::<Rainbow>(RainbowParams {
+                ..Default::default()
+            })
+            .with_driver(driver)
+            .build();
 
-    let mut control = ControlBuilder::new_1d()
-        .with_layout::<Layout>()
-        .with_pattern::<Rainbow>(RainbowParams {
-            ..Default::default()
-        })
-        .with_driver(Desktop::new_1d::<Layout>())
-        .build();
+        loop {
+            if let Err(DesktopError::WindowClosed) = control.tick(elapsed_in_ms()) {
+                break;
+            }
 
-    loop {
-        if let Err(DesktopError::WindowClosed) = control.tick(elapsed_in_ms()) {
-            break;
+            sleep(Duration::from_millis(16));
         }
-
-        sleep(Duration::from_millis(16));
-    }
+    });
 }
