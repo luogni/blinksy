@@ -29,8 +29,8 @@
 
 use crate::{
     color::{Hsv, HsvHueRainbow},
-    dimension::{Dim1d, Dim2d, Dim3d},
     layout::{Layout1d, Layout2d, Layout3d},
+    markers::{Dim1d, Dim2d, Dim3d},
     pattern::Pattern,
 };
 

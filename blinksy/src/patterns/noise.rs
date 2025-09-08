@@ -60,8 +60,8 @@ use noise_functions::{modifiers::Seeded, Noise as NoiseTrait, Sample};
 
 use crate::{
     color::Okhsv,
-    dimension::{Dim1d, Dim2d, Dim3d},
     layout::{Layout1d, Layout2d, Layout3d},
+    markers::{Dim1d, Dim2d, Dim3d},
     pattern::Pattern,
 };
 

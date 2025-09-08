@@ -16,6 +16,7 @@
 //!
 //! - **No-std, no-alloc**: Designed for embedded targets.
 //! - **Spatial in 1D, 2D, or 3D**: Map out the shape of your LEDs in space.
+//! - **Async support**: Supports blocking or asynchronous execution.
 //! - **Full color support**: Supports modern and classic color spaces.
 //! - **Global settings**: Control overall brightness and color correction.
 //! - **Desktop simulation**: Simulate your LEDs on your desktop to play with ideas.
@@ -65,7 +66,7 @@
 //! [blinksy-quickstart-3d-grid]: https://github.com/ahdinosaur/blinksy-quickstart-3d-grid
 //! [control]: https://docs.rs/blinksy/0.9/blinksy/control/index.html
 //!
-//! ### 1D Strip with Rainbow Pattern
+//! ### 1D Strip with Rainbow Pattern (Blocking)
 //!
 //! ```rust,ignore
 //! use blinksy::{ControlBuilder, layout1d, patterns::rainbow::{Rainbow, RainbowParams}};
@@ -86,7 +87,28 @@
 //! }
 //! ```
 //!
-//! ### 2D Grid with Noise Pattern
+//! ### 1D Strip with Rainbow Pattern (Async)
+//!
+//! ```rust,ignore
+//! use blinksy::{ControlBuilder, layout1d, patterns::rainbow::{Rainbow, RainbowParams}};
+//!
+//! // Define a 1D layout with 60 LEDs
+//! layout1d!(Layout, 60);
+//!
+//! let mut control = ControlBuilder::new_1d_async()
+//!     .with_layout::<Layout>()
+//!     .with_pattern::<Rainbow>(RainbowParams::default())
+//!     .with_driver(/* insert your LED driver here */)
+//!     .build();
+//!
+//! control.set_brightness(0.5);
+//!
+//! loop {
+//!     control.tick(/* current time in milliseconds */).await.unwrap();
+//! }
+//! ```
+//!
+//! ### 2D Grid with Noise Pattern (Blocking)
 //!
 //! ```rust,ignore
 //! use blinksy::{
@@ -120,7 +142,7 @@
 //! }
 //! ```
 //!
-//! ### 3D Cube with Noise Pattern
+//! ### 3D Cube with Noise Pattern (Blocking)
 //!
 //! ```rust,ignore
 //! #![no_std]
@@ -209,10 +231,10 @@
 
 pub mod color;
 pub mod control;
-pub mod dimension;
 pub mod driver;
 pub mod drivers;
 pub mod layout;
+pub mod markers;
 pub mod pattern;
 pub mod patterns;
 pub mod time;

@@ -2,7 +2,6 @@
 #![no_main]
 
 use blinksy::{
-    layout::Layout1d,
     layout1d,
     patterns::rainbow::{Rainbow, RainbowParams},
     ControlBuilder,
@@ -19,10 +18,7 @@ fn main() -> ! {
 
     let mut control = ControlBuilder::new_1d()
         .with_layout::<Layout>()
-        .with_pattern::<Rainbow>(RainbowParams {
-            position_scalar: 1.,
-            ..Default::default()
-        })
+        .with_pattern::<Rainbow>(RainbowParams::default())
         .with_driver(ws2812!(p, Layout::PIXEL_COUNT))
         .build();
 

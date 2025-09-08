@@ -1,12 +1,15 @@
-//! # Dimension Type Markers
+//! # Type Markers
 //!
 //! Dimension markers are type-level markers to represent dimensionality.
 //!
 //! - [`Dim1d`]: Marker for one-dimensional layouts
 //! - [`Dim2d`]: Marker for two-dimensional layouts
 //! - [`Dim3d`]: Marker for three-dimensional layouts
-
-use crate::layout::{Layout1d, Layout2d, Layout3d};
+//!
+//! Function markers are type-level markers to represent execution type.
+//!
+//! - [`Blocking`]: Marker for blocking execution
+//! - [`Async`]: Marker for async execution
 
 /// Marker type for one-dimensional space.
 ///
@@ -23,17 +26,12 @@ pub struct Dim2d;
 /// Used as a type parameter to indicate patterns and controls that operate in 3D.
 pub struct Dim3d;
 
-/// Trait for associating layout types with dimension markers.
+/// Marker type for blocking execution.
 ///
-/// This trait creates the relationship between a layout type and its dimensionality,
-/// which helps enforce correct combinations at compile time.
-pub trait LayoutForDim<Dim> {}
+/// Used as a type parameter to indicate execution will be blocking.
+pub struct Blocking;
 
-/// All types implementing Layout1d are compatible with Dim1d.
-impl<T> LayoutForDim<Dim1d> for T where T: Layout1d {}
-
-/// All types implementing Layout2d are compatible with Dim2d.
-impl<T> LayoutForDim<Dim2d> for T where T: Layout2d {}
-
-/// All types implementing Layout3d are compatible with Dim3d.
-impl<T> LayoutForDim<Dim3d> for T where T: Layout3d {}
+/// Marker type for async execution.
+///
+/// Used as a type parameter to indicate execution will be async.
+pub struct Async;

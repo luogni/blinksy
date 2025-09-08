@@ -51,6 +51,8 @@
 //! [`layout2d!`]: crate::layout2d!
 //! [`layout3d!`]: crate::layout3d!
 
+use crate::markers::{Dim1d, Dim2d, Dim3d};
+
 mod iterators;
 mod layout1d;
 mod layout2d;
@@ -60,3 +62,18 @@ pub use iterators::*;
 pub use layout1d::*;
 pub use layout2d::*;
 pub use layout3d::*;
+
+/// Trait for associating layout types with dimension markers.
+///
+/// This trait creates the relationship between a layout type and its dimensionality,
+/// which helps enforce correct combinations at compile time.
+pub trait LayoutForDim<Dim> {}
+
+/// All types implementing Layout1d are compatible with Dim1d.
+impl<T> LayoutForDim<Dim1d> for T where T: Layout1d {}
+
+/// All types implementing Layout2d are compatible with Dim2d.
+impl<T> LayoutForDim<Dim2d> for T where T: Layout2d {}
+
+/// All types implementing Layout3d are compatible with Dim3d.
+impl<T> LayoutForDim<Dim3d> for T where T: Layout3d {}

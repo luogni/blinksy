@@ -61,9 +61,9 @@
 
 use blinksy::{
     color::{ColorCorrection, FromColor, LinearSrgb, Srgb},
-    dimension::{Dim1d, Dim2d, Dim3d, LayoutForDim},
     driver::Driver,
-    layout::{Layout1d, Layout2d, Layout3d},
+    layout::{Layout1d, Layout2d, Layout3d, LayoutForDim},
+    markers::{Dim1d, Dim2d, Dim3d},
 };
 use core::{fmt, marker::PhantomData};
 use egui_miniquad as egui_mq;
