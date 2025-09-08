@@ -50,7 +50,7 @@
 //!
 //! If you want help to support a new target, [make an issue](https://github.com/ahdinosaur/blinksy/issues)!
 //!
-//! [Gledopto]: https://docs.rs/gledopto/0.8/gledopto
+//! [Gledopto]: https://docs.rs/gledopto/0.9/gledopto
 //!
 //! ## Quick Start
 //!
@@ -63,7 +63,7 @@
 //!
 //! [blinksy-quickstart-1d-rope]: https://github.com/ahdinosaur/blinksy-quickstart-1d-rope
 //! [blinksy-quickstart-3d-grid]: https://github.com/ahdinosaur/blinksy-quickstart-3d-grid
-//! [control]: https://docs.rs/blinksy/0.8/blinksy/control/index.html
+//! [control]: https://docs.rs/blinksy/0.9/blinksy/control/index.html
 //!
 //! ### 1D Strip with Rainbow Pattern
 //!

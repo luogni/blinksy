@@ -1,5 +1,31 @@
 # Changelog
 
+## 0.9
+
+Migration guide (0.8 -> 0.9)
+
+- [`blinksy-desktop::driver::Desktop`](https://docs.rs/blinksy-desktop/0.8.0/blinksy_desktop/driver/struct.Desktop.html) has a new API:
+
+```rust
+fn main() {
+    Desktop::new_1d::<Layout>().start(|driver| {
+        let mut control = ControlBuilder::new_1d()
+            .with_layout::<Layout>()
+            .with_pattern::<Pattern>(PatternParams::default())
+            .with_driver(driver)
+            .build();
+
+        loop {
+            // ...
+        }
+    });
+}
+```
+
+Breaking changes:
+
+- [#72](https://github.com/ahdinosaur/blinksy/pull/72): Fix desktop simulator on macOS
+
 ## 0.8
 
 Migration guide (0.7 -> 0.8)
