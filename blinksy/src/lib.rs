@@ -22,27 +22,78 @@
 //! - **Desktop simulation**: Simulate your LEDs on your desktop to play with ideas.
 //! - **RGB+W support**: Supports RGB + White color channels
 //!
-//! ### Multi‑Chipset Support
+//! ### LED Support
 //!
-//! - [clockless](crate::driver::clockless): One-wire (only data, no clock)
-//!   - **[WS2812B]**: Affordable RGB LED, aka NeoPixel
-//! - [clocked](crate::driver::clocked): Two-wire (data and clock)
-//!   - **[APA102]**: High-FPS RGB LED, aka DotStar
+//! #### [Clockless](crate::driver::clockless): One-wire (only data, no clock)
 //!
-//! If you want help to support a new chipset, [make an issue](https://github.com/ahdinosaur/blinksy/issues)!
+//! - **[WS2812B]**: Affordable RGB LED, aka NeoPixel
+//! - **[SK6812]**: RGBW LED
 //!
-//! [APA102]: drivers::apa102
+//! #### [Clocked](crate::driver::clocked): Two-wire (data and clock)
+//!
+//! - **[APA102]**: High-FPS RGB LED, aka DotStar
+//!
+//! If you want help to support a new LED chipset, [make an issue](https://github.com/ahdinosaur/blinksy/issues)!
+//!
 //! [WS2812B]: drivers::ws2812
+//! [SK6812]: drivers::sk6812
+//! [APA102]: drivers::apa102
 //!
 //! ### Pattern (Effect) Library:
 //!
 //! - **[Rainbow]**: A basic scrolling rainbow
-//! - **[Noise]**: A flow through random noise functions.
+//! - **[Noise]**: A flow through random noise functions
 //!
 //! If you want help to port a pattern from FastLED / WLED to Rust, [make an issue](https://github.com/ahdinosaur/blinksy/issues)!
 //!
 //! [Rainbow]: patterns::rainbow
 //! [Noise]: patterns::noise
+//!
+//! ### Microcontroller Family Support
+//!
+//! **Clocked LED support (e.g. APA102):**
+//!
+//! | Micro | HAL            | Blinksy     | Recommended Driver | Backup Driver     |
+//! |-------|----------------|-------------|--------------------|------------------|
+//! | ALL   | [embedded-hal] | [blinksy]   | [Spi][clocked-spi] | [Delay][clocked-delay] |
+//!
+//! [embedded-hal]: https://docs.rs/embedded-hal/latest/embedded_hal/
+//! [blinksy]: https://docs.rs/blinksy/0.10/blinksy/
+//! [clocked-spi]: crate::driver::clocked::ClockedSpiDriver
+//! [clocked-delay]: crate::driver::clocked::ClockedDelayDriver
+//!
+//! **Clockless LED support (e.g. WS2812):**
+//!
+//! | Micro          | HAL         | Blinksy       | Recommended Driver     | Backup Driver |
+//! |----------------|-------------|---------------|------------------------|---------------|
+//! | ALL            | [embedded-hal] | [blinksy]  | -                      | TODO [Spi #12][clockless-spi] |
+//! | ESP32          | [esp-hal]   | [blinksy-esp] | [Rmt][rmt]             | - |
+//! | RP (2040/2350) | [rp-hal]    | TODO          | TODO [#36][rp-issue]   | - |
+//! | STM32          | [stm32-hal] | TODO          | TODO [#78][stm32-issue] | - |
+//! | nRF            | [nrf-hal]   | TODO          | TODO [#77][nrf-issue]  | - |
+//! | atsamd         | [atsamd]    | TODO          | TODO [#67][atsamd-issue] | - |
+//! | AVR (Arduino)  | [avr-hal]   | TODO          | TODO [#79][avr-issue]  | - |
+//! | CH32           | [ch32-hal]  | TODO          | TODO [#80][ch32-issue] | - |
+//! | ???            | -           | -             | -                      | - |
+//!
+//! [clockless-spi]: https://github.com/ahdinosaur/blinksy/issues/12
+//! [esp-hal]: https://docs.espressif.com/projects/rust/esp-hal/latest/
+//! [blinksy-esp]: https://docs.rs/blinksy-esp/0.10/
+//! [rmt]: https://docs.espressif.com/projects/rust/esp-hal/latest/
+//! [rp-hal]: https://github.com/rp-rs/rp-hal/
+//! [rp-issue]: https://github.com/ahdinosaur/blinksy/issues/36
+//! [stm32-hal]: https://github.com/David-OConnor/stm32-hal
+//! [stm32-issue]: https://github.com/ahdinosaur/blinksy/issues/78
+//! [nrf-hal]: https://github.com/nrf-rs/nrf-hal
+//! [nrf-issue]: https://github.com/ahdinosaur/blinksy/issues/77
+//! [atsamd]: https://github.com/atsamd-rs/atsamd
+//! [atsamd-issue]: https://github.com/ahdinosaur/blinksy/issues/67
+//! [avr-hal]: https://github.com/Rahix/avr-hal
+//! [avr-issue]: https://github.com/ahdinosaur/blinksy/issues/79
+//! [ch32-hal]: https://github.com/ch32-rs/ch32-hal
+//! [ch32-issue]: https://github.com/ahdinosaur/blinksy/issues/80
+//!
+//! If you want help to support a new microcontroller family, [make an issue](https://github.com/ahdinosaur/blinksy/issues)!
 //!
 //! ### Board Support Packages
 //!
