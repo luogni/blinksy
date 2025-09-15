@@ -534,6 +534,8 @@ async fn main(_spawner: Spawner) {
 }
 ```
 
+</details>
+
 ## Contributing
 
 Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for details.
