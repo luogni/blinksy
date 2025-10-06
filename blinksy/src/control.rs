@@ -8,6 +8,8 @@
 
 use core::marker::PhantomData;
 
+use heapless::Vec;
+
 use crate::{
     color::{ColorCorrection, FromColor},
     driver::Driver as DriverTrait,
@@ -36,7 +38,8 @@ use crate::{driver::DriverAsync as DriverAsyncTrait, markers::Async};
 ///
 /// # Type Parameters
 ///
-/// * `Dim` - The dimension marker ([`Dim1d`] or [`Dim2d`])
+/// * `PIXEL_COUNT` - The number of LEDs in the layout
+/// * `Dim` - The dimension marker ([`Dim1d`] or [`Dim2d`] or [`Dim3d`])
 /// * `Layout` - The [`layout`](crate::layout) type
 /// * `Pattern` - The [`pattern`](crate::pattern) type
 /// * `Driver` - The LED [`driver`](crate::driver) type
@@ -46,6 +49,7 @@ use crate::{driver::DriverAsync as DriverAsyncTrait, markers::Async};
 /// ```rust,ignore
 /// use blinksy::{
 ///     ControlBuilder,
+///     layout::Layout1d,
 ///     layout1d,
 ///     patterns::rainbow::{Rainbow, RainbowParams}
 /// };
@@ -55,7 +59,7 @@ use crate::{driver::DriverAsync as DriverAsyncTrait, markers::Async};
 ///
 /// // Create a control system
 /// let mut control = ControlBuilder::new_1d()
-///     .with_layout::<Layout>()
+///     .with_layout::<Layout, { Layout::PIXEL_COUNT }>()
 ///     .with_pattern::<Rainbow>(RainbowParams::default())
 ///     .with_driver(/* LED driver */)
 ///     .build();
@@ -74,6 +78,7 @@ use crate::{driver::DriverAsync as DriverAsyncTrait, markers::Async};
 /// ```rust,ignore
 /// use blinksy::{
 ///     ControlBuilder,
+///     layout::Layout1d,
 ///     layout1d,
 ///     patterns::rainbow::{Rainbow, RainbowParams}
 /// };
@@ -83,7 +88,7 @@ use crate::{driver::DriverAsync as DriverAsyncTrait, markers::Async};
 ///
 /// // Create a control system
 /// let mut control = ControlBuilder::new_1d_async()
-///     .with_layout::<Layout>()
+///     .with_layout::<Layout, { Layout::PIXEL_COUNT }>()
 ///     .with_pattern::<Rainbow>(RainbowParams::default())
 ///     .with_driver(/* LED driver */)
 ///     .build();
@@ -96,17 +101,27 @@ use crate::{driver::DriverAsync as DriverAsyncTrait, markers::Async};
 ///     control.tick(/* current time in milliseconds */).await.unwrap();
 /// }
 /// ```
-pub struct Control<Dim, Exec, Layout, Pattern, Driver> {
+pub struct Control<const PIXEL_COUNT: usize, Dim, Exec, Layout, Pattern, Driver>
+where
+    Layout: LayoutForDim<Dim>,
+    Pattern: PatternTrait<Dim, Layout>,
+{
     dim: PhantomData<Dim>,
     exec: PhantomData<Exec>,
     layout: PhantomData<Layout>,
+    pixels: Vec<Pattern::Color, PIXEL_COUNT>,
     pattern: Pattern,
     driver: Driver,
     brightness: f32,
     correction: ColorCorrection,
 }
 
-impl<Dim, Exec, Layout, Pattern, Driver> Control<Dim, Exec, Layout, Pattern, Driver> {
+impl<const PIXEL_COUNT: usize, Dim, Exec, Layout, Pattern, Driver>
+    Control<PIXEL_COUNT, Dim, Exec, Layout, Pattern, Driver>
+where
+    Layout: LayoutForDim<Dim>,
+    Pattern: PatternTrait<Dim, Layout>,
+{
     /// Creates a new control system.
     ///
     /// # Arguments
@@ -122,9 +137,10 @@ impl<Dim, Exec, Layout, Pattern, Driver> Control<Dim, Exec, Layout, Pattern, Dri
             dim: PhantomData,
             exec: PhantomData,
             layout: PhantomData,
+            pixels: Vec::new(),
             pattern,
             driver,
-            brightness: 1.,
+            brightness: 1.0,
             correction: ColorCorrection::default(),
         }
     }
@@ -148,7 +164,8 @@ impl<Dim, Exec, Layout, Pattern, Driver> Control<Dim, Exec, Layout, Pattern, Dri
     }
 }
 
-impl<Dim, Layout, Pattern, Driver> Control<Dim, Blocking, Layout, Pattern, Driver>
+impl<const PIXEL_COUNT: usize, Dim, Layout, Pattern, Driver>
+    Control<PIXEL_COUNT, Dim, Blocking, Layout, Pattern, Driver>
 where
     Layout: LayoutForDim<Dim>,
     Pattern: PatternTrait<Dim, Layout>,
@@ -169,13 +186,20 @@ where
     ///
     /// Result indicating success or an error from the driver
     pub fn tick(&mut self, time_in_ms: u64) -> Result<(), Driver::Error> {
-        let pixels = self.pattern.tick(time_in_ms);
-        self.driver.write(pixels, self.brightness, self.correction)
+        // Write colors from Pattern to pixel buffer.
+        self.pixels.extend(self.pattern.tick(time_in_ms));
+        // Write colors in pixel buffer to Driver.
+        self.driver.write(
+            self.pixels.drain(0..PIXEL_COUNT),
+            self.brightness,
+            self.correction,
+        )
     }
 }
 
 #[cfg(feature = "async")]
-impl<Dim, Layout, Pattern, Driver> Control<Dim, Async, Layout, Pattern, Driver>
+impl<const PIXEL_COUNT: usize, Dim, Layout, Pattern, Driver>
+    Control<PIXEL_COUNT, Dim, Async, Layout, Pattern, Driver>
 where
     Layout: LayoutForDim<Dim>,
     Pattern: PatternTrait<Dim, Layout>,
@@ -206,7 +230,7 @@ where
 ///
 /// The builder allows your to build up your [`Control`] system one-by-one
 /// and handles the combination of generic types and contraints that [`Control`] expects.
-pub struct ControlBuilder<Dim, Exec, Layout, Pattern, Driver> {
+pub struct ControlBuilder<const PIXEL_COUNT: usize, Dim, Exec, Layout, Pattern, Driver> {
     dim: PhantomData<Dim>,
     exec: PhantomData<Exec>,
     layout: PhantomData<Layout>,
@@ -214,13 +238,13 @@ pub struct ControlBuilder<Dim, Exec, Layout, Pattern, Driver> {
     driver: Driver,
 }
 
-impl ControlBuilder<(), (), (), (), ()> {
+impl ControlBuilder<0, (), (), (), (), ()> {
     /// Starts building a one-dimensional blocking control system.
     ///
     /// # Returns
     ///
     /// A builder initialized for 1D, blocking
-    pub fn new_1d() -> ControlBuilder<Dim1d, Blocking, (), (), ()> {
+    pub fn new_1d() -> ControlBuilder<0, Dim1d, Blocking, (), (), ()> {
         ControlBuilder {
             dim: PhantomData,
             exec: PhantomData,
@@ -232,13 +256,13 @@ impl ControlBuilder<(), (), (), (), ()> {
 }
 
 #[cfg(feature = "async")]
-impl ControlBuilder<(), (), (), (), ()> {
+impl ControlBuilder<0, (), (), (), (), ()> {
     /// Starts building a one-dimensional asynchronous control system.
     ///
     /// # Returns
     ///
     /// A builder initialized for 1D, async
-    pub fn new_1d_async() -> ControlBuilder<Dim1d, Async, (), (), ()> {
+    pub fn new_1d_async() -> ControlBuilder<0, Dim1d, Async, (), (), ()> {
         ControlBuilder {
             dim: PhantomData,
             exec: PhantomData,
@@ -249,13 +273,13 @@ impl ControlBuilder<(), (), (), (), ()> {
     }
 }
 
-impl ControlBuilder<(), (), (), (), ()> {
+impl ControlBuilder<0, (), (), (), (), ()> {
     /// Starts building a two-dimensional blocking control system.
     ///
     /// # Returns
     ///
     /// A builder initialized for 2D, blocking
-    pub fn new_2d() -> ControlBuilder<Dim2d, Blocking, (), (), ()> {
+    pub fn new_2d() -> ControlBuilder<0, Dim2d, Blocking, (), (), ()> {
         ControlBuilder {
             dim: PhantomData,
             exec: PhantomData,
@@ -267,13 +291,13 @@ impl ControlBuilder<(), (), (), (), ()> {
 }
 
 #[cfg(feature = "async")]
-impl ControlBuilder<(), (), (), (), ()> {
+impl ControlBuilder<0, (), (), (), (), ()> {
     /// Starts building a two-dimensional asynchronous control system.
     ///
     /// # Returns
     ///
     /// A builder initialized for 2D, async
-    pub fn new_2d_async() -> ControlBuilder<Dim2d, Async, (), (), ()> {
+    pub fn new_2d_async() -> ControlBuilder<0, Dim2d, Async, (), (), ()> {
         ControlBuilder {
             dim: PhantomData,
             exec: PhantomData,
@@ -284,13 +308,13 @@ impl ControlBuilder<(), (), (), (), ()> {
     }
 }
 
-impl ControlBuilder<(), (), (), (), ()> {
+impl ControlBuilder<0, (), (), (), (), ()> {
     /// Starts building a three-dimensional blocking control system.
     ///
     /// # Returns
     ///
     /// A builder initialized for 3D, blocking
-    pub fn new_3d() -> ControlBuilder<Dim3d, Blocking, (), (), ()> {
+    pub fn new_3d() -> ControlBuilder<0, Dim3d, Blocking, (), (), ()> {
         ControlBuilder {
             dim: PhantomData,
             exec: PhantomData,
@@ -302,13 +326,13 @@ impl ControlBuilder<(), (), (), (), ()> {
 }
 
 #[cfg(feature = "async")]
-impl ControlBuilder<(), (), (), (), ()> {
+impl ControlBuilder<0, (), (), (), (), ()> {
     /// Starts building a three-dimensional asynchronous control system.
     ///
     /// # Returns
     ///
     /// A builder initialized for 3D, async
-    pub fn new_3d_async() -> ControlBuilder<Dim3d, Async, (), (), ()> {
+    pub fn new_3d_async() -> ControlBuilder<0, Dim3d, Async, (), (), ()> {
         ControlBuilder {
             dim: PhantomData,
             exec: PhantomData,
@@ -319,17 +343,20 @@ impl ControlBuilder<(), (), (), (), ()> {
     }
 }
 
-impl<Dim, Exec, Pattern, Driver> ControlBuilder<Dim, Exec, (), Pattern, Driver> {
+impl<Dim, Exec, Pattern, Driver> ControlBuilder<0, Dim, Exec, (), Pattern, Driver> {
     /// Specifies the layout type for the control system.
     ///
     /// # Type Parameters
     ///
     /// * `Layout` - The layout type implementing Layout that corresponds to Dim
+    /// * `PIXEL_COUNT` - A constant for the number of pixels (`Layout::PIXEL_COUNT`)
     ///
     /// # Returns
     ///
     /// Builder with layout type specified
-    pub fn with_layout<Layout>(self) -> ControlBuilder<Dim, Exec, Layout, Pattern, Driver>
+    pub fn with_layout<Layout, const PIXEL_COUNT: usize>(
+        self,
+    ) -> ControlBuilder<PIXEL_COUNT, Dim, Exec, Layout, Pattern, Driver>
     where
         Layout: LayoutForDim<Dim>,
     {
@@ -343,7 +370,8 @@ impl<Dim, Exec, Pattern, Driver> ControlBuilder<Dim, Exec, (), Pattern, Driver> 
     }
 }
 
-impl<Dim, Exec, Layout, Driver> ControlBuilder<Dim, Exec, Layout, (), Driver>
+impl<const PIXEL_COUNT: usize, Dim, Exec, Layout, Driver>
+    ControlBuilder<PIXEL_COUNT, Dim, Exec, Layout, (), Driver>
 where
     Layout: LayoutForDim<Dim>,
 {
@@ -363,7 +391,7 @@ where
     pub fn with_pattern<Pattern>(
         self,
         params: Pattern::Params,
-    ) -> ControlBuilder<Dim, Exec, Layout, Pattern, Driver>
+    ) -> ControlBuilder<PIXEL_COUNT, Dim, Exec, Layout, Pattern, Driver>
     where
         Pattern: PatternTrait<Dim, Layout>,
     {
@@ -378,7 +406,9 @@ where
     }
 }
 
-impl<Dim, Layout, Pattern> ControlBuilder<Dim, Blocking, Layout, Pattern, ()> {
+impl<const PIXEL_COUNT: usize, Dim, Layout, Pattern>
+    ControlBuilder<PIXEL_COUNT, Dim, Blocking, Layout, Pattern, ()>
+{
     /// Specifies the LED driver for the control system (blocking).
     ///
     /// # Arguments
@@ -391,7 +421,7 @@ impl<Dim, Layout, Pattern> ControlBuilder<Dim, Blocking, Layout, Pattern, ()> {
     pub fn with_driver<Driver>(
         self,
         driver: Driver,
-    ) -> ControlBuilder<Dim, Blocking, Layout, Pattern, Driver>
+    ) -> ControlBuilder<PIXEL_COUNT, Dim, Blocking, Layout, Pattern, Driver>
     where
         Driver: DriverTrait,
     {
@@ -406,7 +436,9 @@ impl<Dim, Layout, Pattern> ControlBuilder<Dim, Blocking, Layout, Pattern, ()> {
 }
 
 #[cfg(feature = "async")]
-impl<Dim, Layout, Pattern> ControlBuilder<Dim, Async, Layout, Pattern, ()> {
+impl<const PIXEL_COUNT: usize, Dim, Layout, Pattern>
+    ControlBuilder<PIXEL_COUNT, Dim, Async, Layout, Pattern, ()>
+{
     /// Specifies the LED driver for the control system (async).
     ///
     /// # Arguments
@@ -419,7 +451,7 @@ impl<Dim, Layout, Pattern> ControlBuilder<Dim, Async, Layout, Pattern, ()> {
     pub fn with_driver<Driver>(
         self,
         driver: Driver,
-    ) -> ControlBuilder<Dim, Async, Layout, Pattern, Driver>
+    ) -> ControlBuilder<PIXEL_COUNT, Dim, Async, Layout, Pattern, Driver>
     where
         Driver: DriverAsyncTrait,
     {
@@ -433,7 +465,8 @@ impl<Dim, Layout, Pattern> ControlBuilder<Dim, Async, Layout, Pattern, ()> {
     }
 }
 
-impl<Dim, Layout, Pattern, Driver> ControlBuilder<Dim, Blocking, Layout, Pattern, Driver>
+impl<const PIXEL_COUNT: usize, Dim, Layout, Pattern, Driver>
+    ControlBuilder<PIXEL_COUNT, Dim, Blocking, Layout, Pattern, Driver>
 where
     Layout: LayoutForDim<Dim>,
     Pattern: PatternTrait<Dim, Layout>,
@@ -445,13 +478,14 @@ where
     /// # Returns
     ///
     /// A fully configured Control instance
-    pub fn build(self) -> Control<Dim, Blocking, Layout, Pattern, Driver> {
+    pub fn build(self) -> Control<PIXEL_COUNT, Dim, Blocking, Layout, Pattern, Driver> {
         Control::new(self.pattern, self.driver)
     }
 }
 
 #[cfg(feature = "async")]
-impl<Dim, Layout, Pattern, Driver> ControlBuilder<Dim, Async, Layout, Pattern, Driver>
+impl<const PIXEL_COUNT: usize, Dim, Layout, Pattern, Driver>
+    ControlBuilder<PIXEL_COUNT, Dim, Async, Layout, Pattern, Driver>
 where
     Layout: LayoutForDim<Dim>,
     Pattern: PatternTrait<Dim, Layout>,
@@ -463,7 +497,7 @@ where
     /// # Returns
     ///
     /// A fully configured Control instance
-    pub fn build(self) -> Control<Dim, Async, Layout, Pattern, Driver> {
+    pub fn build(self) -> Control<PIXEL_COUNT, Dim, Async, Layout, Pattern, Driver> {
         Control::new(self.pattern, self.driver)
     }
 }
