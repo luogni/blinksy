@@ -10,7 +10,7 @@
 //! - Define your LED [`layout`] in 1D, 2D, or 3D space
 //! - Create your visual [`pattern`] (effect), or choose from our built-in [`patterns`] library
 //!   - The pattern will compute colors for each LED based on its position
-//! - Setup a [`driver`] to send each frame of colors to your LEDs, using our built-in [`drivers`] library.
+//! - Setup a [`driver`] to send each frame of colors to your [`leds`]
 //!
 //! ## Features
 //!
@@ -35,9 +35,9 @@
 //!
 //! If you want help to support a new LED chipset, [make an issue](https://github.com/ahdinosaur/blinksy/issues)!
 //!
-//! [WS2812B]: drivers::ws2812
-//! [SK6812]: drivers::sk6812
-//! [APA102]: drivers::apa102
+//! [WS2812B]: leds::Ws2812
+//! [SK6812]: leds::Sk6812
+//! [APA102]: leds::Apa102
 //!
 //! ### Pattern (Effect) Library:
 //!
@@ -53,14 +53,13 @@
 //!
 //! **Clocked LED support (e.g. APA102):**
 //!
-//! | Micro | HAL            | Blinksy     | Recommended Driver | Backup Driver     |
+//! | Micro | HAL            | Blinksy     | Recommended Writer | Backup Writer
 //! |-------|----------------|-------------|--------------------|------------------|
-//! | ALL   | [embedded-hal] | [blinksy]   | [Spi][clocked-spi] | [Delay][clocked-delay] |
+//! | ALL   | [embedded-hal] | [blinksy]   | [embedded_hal::spi::SpiBus] / [embedded_hal_async::spi::SpiBus] | [Delay][clocked-delay] |
 //!
-//! [embedded-hal]: https://docs.rs/embedded-hal/latest/embedded_hal/
-//! [blinksy]: https://docs.rs/blinksy/0.10/blinksy/
-//! [clocked-spi]: crate::driver::clocked::ClockedSpiDriver
-//! [clocked-delay]: crate::driver::clocked::ClockedDelayDriver
+//! [embedded-hal]: embedded_hal
+//! [blinksy]: crate
+//! [clocked-delay]: crate::driver::clocked::ClockedDelay
 //!
 //! **Clockless LED support (e.g. WS2812):**
 //!
@@ -119,6 +118,8 @@
 //!
 //! ### 1D Strip with Rainbow Pattern (Blocking)
 //!
+//! ### 1D Strip with Rainbow Pattern (Blocking)
+//!
 //! ```rust,ignore
 //! # use blinksy::{ControlBuilder, layout::Layout1d, layout1d, patterns::rainbow::{Rainbow, RainbowParams}};
 //! #
@@ -128,7 +129,8 @@
 //! let mut control = ControlBuilder::new_1d()
 //!     .with_layout::<Layout, { Layout::PIXEL_COUNT }>()
 //!     .with_pattern::<Rainbow>(RainbowParams::default())
-//!     .with_driver(/* insert your LED driver here */)
+//!     .with_driver(/* Insert your LED driver here */)
+//!     .with_frame_buffer_size::</* Length of frame buffer */>()
 //!     .build();
 //!
 //! control.set_brightness(0.5);
@@ -149,7 +151,8 @@
 //! let mut control = ControlBuilder::new_1d_async()
 //!     .with_layout::<Layout, { Layout::PIXEL_COUNT }>()
 //!     .with_pattern::<Rainbow>(RainbowParams::default())
-//!     .with_driver(/* insert your LED driver here */)
+//!     .with_driver(/* Insert your LED driver here */)
+//!     .with_frame_buffer_size::</* Length of frame buffer */>()
 //!     .build();
 //!
 //! control.set_brightness(0.5);
@@ -183,7 +186,126 @@
 //! let mut control = ControlBuilder::new_2d()
 //!     .with_layout::<Layout, { Layout::PIXEL_COUNT }>()
 //!     .with_pattern::<Noise2d<noise_fns::Perlin>>(NoiseParams::default())
-//!     .with_driver(/* insert your LED driver here */)
+//!     .with_driver(/* Insert your LED driver here */)
+//!     .with_frame_buffer_size::</* Length of frame buffer */>()
+//!     .build();
+//!
+//! control.set_brightness(0.5);
+//!
+//! loop {
+//!     control.tick(/* current time in milliseconds */).unwrap();
+//! }
+//! ```
+//!
+//! ### 3D Cube with Noise Pattern (Blocking)
+//!
+//! ```rust,ignore
+//! # use blinksy::{
+//! #     layout::{Layout3d, Shape3d, Vec3},
+//! #     layout3d,
+//! #     patterns::noise::{noise_fns, Noise3d, NoiseParams},
+//! #     ControlBuilder,
+//! # };
+//! #
+//! layout3d!(
+//!     Layout,
+//!     [
+//!         // bottom face
+//!         Shape3d::Grid {
+//!             start: Vec3::new(1., -1., 1.),           // right bottom front
+//!             horizontal_end: Vec3::new(-1., -1., 1.), // left bottom front
+//!             vertical_end: Vec3::new(1., -1., -1.),   // right bottom back
+//!             horizontal_pixel_count: 16,
+//!             vertical_pixel_count: 16,
+//!             serpentine: true,
+//!         },
+//!         // back face
+//!         Shape3d::Grid {
+//!             start: Vec3::new(-1., -1., -1.),         // left bottom back
+//!             horizontal_end: Vec3::new(-1., 1., -1.), // left top back
+//!             vertical_end: Vec3::new(1., -1., -1.),   // right bottom back
+//!             horizontal_pixel_count: 16,
+//!             vertical_pixel_count: 16,
+//!             serpentine: true,
+//!         },
+//!         // right face
+//!         Shape3d::Grid {
+//!             start: Vec3::new(1., 1., -1.),         // right top back
+//!             horizontal_end: Vec3::new(1., 1., 1.), // right top front
+//!             vertical_end: Vec3::new(1., -1., -1.), // right bottom back
+//!             horizontal_pixel_count: 16,
+//!             vertical_pixel_count: 16,
+//!             serpentine: true,
+//!         },
+//!         // front face
+//!         Shape3d::Grid {
+//!             start: Vec3::new(-1., -1., 1.),         // left bottom front
+//!             horizontal_end: Vec3::new(1., -1., 1.), // right bottom front
+//!             vertical_end: Vec3::new(-1., 1., 1.),   // left top front
+//!             horizontal_pixel_count: 16,
+//!             vertical_pixel_count: 16,
+//!             serpentine: true,
+//!         },
+//!         // left face
+//!         Shape3d::Grid {
+////!             start: Vec3::new(-1., 1., -1.),           // left top back
+//!             horizontal_end: Vec3::new(-1., -1., -1.), // left bottom back
+//!             vertical_end: Vec3::new(-1., 1., 1.),     // left top front
+//!             horizontal_pixel_count: 16,
+//!             vertical_pixel_count: 16,
+//!             serpentine: true,
+//!         },
+//!         // top face
+//!         Shape3d::Grid {
+//!             start: Vec3::new(1., 1., 1.),           // right top front
+//!             horizontal_end: Vec3::new(1., 1., -1.), // right top back
+//!             vertical_end: Vec3::new(-1., 1., 1.),   // left top front
+//!             horizontal_pixel_count: 16,
+//!             vertical_pixel_count: 16,
+//!             serpentine: true,
+//!         }
+//!     ]
+//! );
+//!
+//! let mut control = ControlBuilder::new_3d()
+//!     .with_layout::<Layout, { Layout::PIXEL_COUNT }>()
+//!     .with_pattern::<Noise3d<noise_fns::Perlin>>(NoiseParams::default())
+//!     .with_driver(/* Insert your LED driver here */)
+//!     .with_frame_buffer_size::</* Length of frame buffer */>()
+//!     .build();
+//!
+//! control.set_brightness(0.2);
+//!
+//! loop {
+//!     control.tick(/* current time in milliseconds */).unwrap();
+//! }
+//! ```
+//!
+//! ### 2D Grid with Noise Pattern (Blocking)
+//!
+//! ```rust,ignore
+//! # use blinksy::{
+//! #     ControlBuilder,
+//! #     layout::{Layout2d, Shape2d, Vec2},
+//! #     layout2d,
+//! #     patterns::noise::{noise_fns, Noise2d, NoiseParams},
+//! # };
+//! #
+//! layout2d!(
+//!     Layout,
+//!     [Shape2d::Grid {
+//!         start: Vec2::new(-1., -1.),
+//!         horizontal_end: Vec2::new(1., -1.),
+//!         vertical_end: Vec2::new(-1., 1.),
+//!         horizontal_pixel_count: 16,
+//!         vertical_pixel_count: 16,
+//!         serpentine: true,
+//!     }]
+//! );
+//! let mut control = ControlBuilder::new_2d()
+//!     .with_layout::<Layout, { Layout::PIXEL_COUNT }>()
+//!     .with_pattern::<Noise2d<noise_fns::Perlin>>(NoiseParams::default())
+//!     .with_driver(/* Insert your LED driver here */)
 //!     .build();
 //!
 //! control.set_brightness(0.5);
@@ -266,7 +388,7 @@
 //! let mut control = ControlBuilder::new_3d()
 //!     .with_layout::<Layout, { Layout::PIXEL_COUNT }>()
 //!     .with_pattern::<Noise3d<noise_fns::Perlin>>(NoiseParams::default())
-//!     .with_driver(/* insert your LED driver here */)
+//!     .with_driver(/* Insert your LED driver here */)
 //!     .build();
 //!
 //! control.set_brightness(0.2);
@@ -280,8 +402,8 @@
 pub mod color;
 pub mod control;
 pub mod driver;
-pub mod drivers;
 pub mod layout;
+pub mod leds;
 pub mod markers;
 pub mod pattern;
 pub mod patterns;

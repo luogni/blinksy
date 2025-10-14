@@ -5,6 +5,7 @@ use core::iter;
 
 use blinksy::{
     layout::{Layout3d, Shape3d, Vec3},
+    leds::Ws2812,
     patterns::noise::{noise_fns, Noise3d, NoiseParams},
     util::map_range,
     ControlBuilder,
@@ -51,7 +52,8 @@ fn main() -> ! {
             time_scalar: 0.25 / 1e3,
             position_scalar: 0.25,
         })
-        .with_driver(ws2812!(p, VolumeCubeLayout::PIXEL_COUNT))
+        .with_driver(ws2812!(p, VolumeCubeLayout::PIXEL_COUNT, buffered))
+        .with_frame_buffer_size::<{ Ws2812::frame_buffer_size(VolumeCubeLayout::PIXEL_COUNT) }>()
         .build();
 
     control.set_brightness(0.1);
