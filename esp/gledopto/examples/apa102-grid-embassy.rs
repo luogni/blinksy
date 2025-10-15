@@ -10,13 +10,15 @@ use blinksy::{
     ControlBuilder,
 };
 use embassy_executor::Spawner;
-use gledopto::{apa102_async, board, bootloader, elapsed, main_embassy};
+use gledopto::{apa102_async, board, bootloader, elapsed, init_embassy, main_embassy};
 
 bootloader!();
 
 #[main_embassy]
 async fn main(_spawner: Spawner) {
     let p = board!();
+
+    init_embassy!(p);
 
     layout2d!(
         Layout,
