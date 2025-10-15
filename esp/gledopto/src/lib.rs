@@ -131,12 +131,12 @@ pub use esp_hal as hal;
 pub use hal::main;
 
 #[cfg(feature = "embassy")]
-/// Re-export the ESP32 Embassy HAL
-pub use esp_hal_embassy as hal_embassy;
+/// Re-export the ESP RTOS
+pub use esp_rtos as rtos;
 
 #[cfg(feature = "embassy")]
-/// Re-export the main macro from esp_hal for entry point definition
-pub use hal_embassy::main as main_embassy;
+/// Re-export the main macro from esp_rtos for async entry point definition
+pub use rtos::main as main_embassy;
 
 /// Re-export the ESP32 heap allocator
 #[cfg(feature = "alloc")]
@@ -200,7 +200,7 @@ macro_rules! function_button {
 macro_rules! init_embassy {
     ($peripherals:ident) => {{
         let timg0 = $crate::hal::timer::timg::TimerGroup::new($peripherals.TIMG0);
-        $crate::hal_embassy::init(timg0.timer0);
+        $crate::rtos::start(timg0.timer0);
     }};
 }
 
@@ -321,7 +321,13 @@ macro_rules! rmt {
 #[macro_export]
 macro_rules! clockless {
     ($peripherals:ident, $pixel_count:expr, $led:ty) => {{
-        $crate::clockless!($peripherals, $pixel_count, $led, 64)
+        $crate::clockless!($peripherals, $pixel_count, $led, {
+            // $crate::hal::rmt::CHANNEL_RAM_SIZE
+            // $crate::hal::rmt::CHANNEL_RAM_SIZE is too big, causes too big of gaps.
+            <$led as $crate::blinksy::driver::clockless::ClocklessLed>::LED_CHANNELS.channel_count()
+                * 8
+                + 1
+        })
     }};
     ($peripherals:ident, $pixel_count:expr, $led:ty, buffered) => {{
         $crate::clockless!($peripherals, $pixel_count, $led, {
@@ -387,6 +393,8 @@ macro_rules! ws2812 {
 /// - `$peripherals` - The ESP32 peripherals instance
 /// - `$pixel_count` - The number of LEDs
 /// - `$led` - The type of LED
+/// - `$rmt_buffer_size` (Optional) - The length of the RMT buffer
+///   - (Can be `buffered` literal to mean RMT buffer size should be complete frame.)
 ///
 /// # Returns
 ///
@@ -395,7 +403,17 @@ macro_rules! ws2812 {
 #[macro_export]
 macro_rules! clockless_async {
     ($peripherals:ident, $pixel_count:expr, $led:ty) => {{
-        $crate::clockless_async!($peripherals, $pixel_count, $led, 64)
+        $crate::clockless_async!($peripherals, $pixel_count, $led, {
+            // $crate::hal::rmt::CHANNEL_RAM_SIZE is too big, causes too big of gaps.
+            <$led as $crate::blinksy::driver::clockless::ClocklessLed>::LED_CHANNELS.channel_count()
+                * 8
+                + 1
+        })
+    }};
+    ($peripherals:ident, $pixel_count:expr, $led:ty, buffered) => {{
+        $crate::clockless_async!($peripherals, $pixel_count, $led, {
+            $crate::blinksy_esp::rmt::rmt_buffer_size::<$led>($pixel_count)
+        })
     }};
     ($peripherals:ident, $pixel_count:expr, $led:ty, $rmt_buffer_size:expr) => {{
         let led_pin = $peripherals.GPIO16;
@@ -421,6 +439,7 @@ macro_rules! clockless_async {
 /// - `$peripherals` - The ESP32 peripherals instance
 /// - `$pixel_count` - The number of LEDs in the strip
 /// - `$rmt_buffer_size` (Optional) - The length of the RMT buffer
+///   - (Can be `buffered` literal to mean RMT buffer size should be complete frame.)
 ///
 /// # Returns
 ///
@@ -428,6 +447,17 @@ macro_rules! clockless_async {
 #[cfg(feature = "async")]
 #[macro_export]
 macro_rules! ws2812_async {
+    ($peripherals:ident, $pixel_count:expr) => {{
+        $crate::clockless_async!($peripherals, $pixel_count, $crate::blinksy::leds::Ws2812)
+    }};
+    ($peripherals:ident, $pixel_count:expr, buffered) => {{
+        $crate::clockless_async!(
+            $peripherals,
+            $pixel_count,
+            $crate::blinksy::leds::Ws2812,
+            buffered
+        )
+    }};
     ($peripherals:ident, $pixel_count:expr, $rmt_buffer_size:expr) => {{
         $crate::clockless_async!(
             $peripherals,
@@ -435,8 +465,5 @@ macro_rules! ws2812_async {
             $crate::blinksy::leds::Ws2812,
             $rmt_buffer_size
         )
-    }};
-    ($peripherals:ident, $pixel_count:expr) => {{
-        $crate::clockless_async!($peripherals, $pixel_count, $crate::blinksy::leds::Ws2812)
     }};
 }
