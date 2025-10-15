@@ -2,7 +2,25 @@
 
 ## UNRELEASED
 
-Migration guide (0.10 -> UNRELEASED)
+## 0.11
+
+A step towards more efficient LED output.
+
+Now on each frame, the driver has two separate steps:
+
+1. Encode the next frame into a buffer.
+  1. Get all the colors for the next frame from the `Pattern`.
+  2. Do any processing (e.g. convert color to linear sRGB, brightness, color corrections, etc)
+  3. Format colors into words (bytes) that will be sent to the LEDs.
+  4. Add any other words (bytes), depending on the LED type. (e.g. a start header, an end trailer, etc)
+4. Send the encoded frame buffer to the LEDs.
+
+The purpose of separating these steps is to:
+
+- Minimize the work required to send chunks of the encoded frame buffer to the LEDs, thus minimizing the timing gap in between these chunks.
+- Open up the possibility of pre-encoding the next frame into a buffer, while sending the current frame to the LEDs.
+
+### Migration guide (0.10 -> 0.11)
 
 - `defmt` is now optional across all crates, defaults to enabled in `gledopto`.
 - `alloc` is now optional in `gledopto` crate.
@@ -156,25 +174,23 @@ let driver = ClockedDriver::default()
   - If blocking and not too many LEDs, you should use `rmt_buffer_size::<Led>(Layout::PIXEL_COUNT)`.
   - If blocking and too many LEDs, you should use `64`.
 
-Breaking changes:
+### Changes
 
+- [#96](https://github.com/ahdinosaur/blinksy/pull/96): Gledopto clockless led macros default to using buffered RMT
+- [#94](https://github.com/ahdinosaur/blinksy/pull/94): Upgrade to esp-hal@1.0.0-rc.1
 - [#93](https://github.com/ahdinosaur/blinksy/pull/93): Make more features optional
 - [#92](https://github.com/ahdinosaur/blinksy/pull/92): Document and enforce generic constants in ControlBuilder
 - [#90](https://github.com/ahdinosaur/blinksy/pull/90): Re-architect to pre-calculate a buffer for each frame
+- [#85](https://github.com/ahdinosaur/blinksy/pull/85): Pin RMT driver in RAM for examples
 - [#82](https://github.com/ahdinosaur/blinksy/pull/82): Use pixels buffer
   - Write all colors from `Pattern` iterator to pixel buffer, then write pixel buffer to LEDs with `Driver`.
 - [#87](https://github.com/ahdinosaur/blinksy/pull/87): Refactor clocked LED drivers
-
-Feature additions:
-
-- [#85](https://github.com/ahdinosaur/blinksy/pull/85): Pin RMT driver in RAM for examples
-
 
 ## 0.10
 
 Yee haw `blinksy` now supports async!
 
-Migration guide (0.9 -> 0.10)
+### Migration guide (0.9 -> 0.10)
 
 - You can now add the `async` feature and use async drivers.
   - For `gledopto`, add the `embassy` feature and use the `embassy_main` entry.
@@ -188,11 +204,11 @@ Migration guide (0.9 -> 0.10)
   - Move `dimension::LayoutForDim` to `layout::LayoutForDim`
   - Un-pub-ify internal functions within drivers
 
-Breaking changes
+### Breaking changes
 
 - [#54](https://github.com/ahdinosaur/blinksy/pull/54): Add async drivers
 
-Bug fixes:
+### Bug fixes
 
 - [#73](https://github.com/ahdinosaur/blinksy/pull/73): Fix APA102 color correction
 - [#74](https://github.com/ahdinosaur/blinksy/pull/74): Remove extranaeous docstring
@@ -200,7 +216,7 @@ Bug fixes:
 
 ## 0.9
 
-Migration guide (0.8 -> 0.9)
+### Migration guide (0.8 -> 0.9)
 
 - [`blinksy-desktop::driver::Desktop`](https://docs.rs/blinksy-desktop/0.8.0/blinksy_desktop/driver/struct.Desktop.html) has a new API:
 
@@ -220,40 +236,40 @@ fn main() {
 }
 ```
 
-Breaking changes:
+### Breaking changes
 
 - [#72](https://github.com/ahdinosaur/blinksy/pull/72): Fix desktop simulator on macOS
 
 ## 0.8
 
-Migration guide (0.7 -> 0.8)
+### Migration guide (0.7 -> 0.8)
 
 - `rust-version` has been increased to 1.88, to follow `esp-hal`.
 - You should upgrade to `espflash@4`, which will also require adding bootloader metadata via a macro.
   - See `gledopto` library and examples for `bootloader!()` on how to easily do this.
   - See [`esp-hal-1.0.0-rc.0` release](https://github.com/esp-rs/esp-hal/releases/tag/esp-hal-v1.0.0-rc.0) for "Special migration note" about this.
 
-Breaking changes:
+### Breaking changes
 
 - [#66](https://github.com/ahdinosaur/blinksy/pull/66): Upgrade to esp-hal-1.0.0-rc.0
 
 ## 0.7
 
-Migration guide (0.6 -> 0.7)
+### Migration guide (0.6 -> 0.7)
 
-- No known breaking changes.
+No known breaking changes.
 
-Feature additions:
+### Feature additions
 
 - [#59](https://github.com/ahdinosaur/blinksy/pull/59): Add example of 3D volumetric cube
 - [#65](https://github.com/ahdinosaur/blinksy/pull/65): Add support for GL-C-017WL-D
 - [#63](https://github.com/ahdinosaur/blinksy/pull/63): Add arc shape
 
-Bug fixes:
+### Bug fixes
 
 - [#61](https://github.com/ahdinosaur/blinksy/pull/61): Fix points step of Shape::Line
 
-Visual improvements:
+### Visual improvements
 
 - [#64](https://github.com/ahdinosaur/blinksy/pull/64): Change rainbow pattern so is not just over x, but over all available dimensions
 
@@ -261,16 +277,16 @@ Visual improvements:
 
 Woo hoo `blinksy` now supports 3D!
 
-Migration guide (0.5 -> 0.6):
+### Migration guide (0.5 -> 0.6):
 
-- No known breaking changes.
+No known breaking changes.
 
-Feature additions:
+### Feature additions
 
 - [#57](https://github.com/ahdinosaur/blinksy/pull/57): Add support for 3D layouts and animations
 - [#58](https://github.com/ahdinosaur/blinksy/pull/58): Add 3D to desktop simulator
 
-Minor changes:
+### Minor changes
 
 - [#56](https://github.com/ahdinosaur/blinksy/pull/56): Refactor layout code into separate files
 
@@ -278,11 +294,11 @@ Thanks [@ahdinosaur](https://github.com/ahdinosaur) for their contributions.
 
 ## 0.5
 
-Migration guide (0.4 -> 0.5):
+### Migration guide (0.4 -> 0.5):
 
-- No known breaking changes.
+No known breaking changes.
 
-Changes:
+### Changes
 
 - [#50](https://github.com/ahdinosaur/blinksy/pull/50): Use `bluurryy/noise-functions` instead of `Razaekel/noise-rs`
 - [#45](https://github.com/ahdinosaur/blinksy/pull/45): Add support for SK6812
